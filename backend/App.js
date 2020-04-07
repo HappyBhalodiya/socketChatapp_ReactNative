@@ -1,31 +1,35 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const chatRouter = require("./route/chatroute");
-const loginRouter = require("./route/loginRoute");
-
+var chatRouter = require("./route/chatroute");
+var loginRoute = require("./route/loginroute")
 //require the http module
 const http = require("http").Server(app);
-
+var cors = require('cors');
+app.use(bodyParser.urlencoded({'extended':'true'}));           
+app.use(bodyParser.json());        
+app.use(cors());   
 // require the socket.io module
 const io = require("socket.io");
 
 const port = 5000;
-
+const Chat = require("./models/Chat");
+const connect = require("./dbconnect");
 //bodyparser middleware
 app.use(bodyParser.json());
 
 //routes
-app.use("/chats", chatRouter.chats);
-app.use("/login", loginRouter);
+app.get("/chats", chatRouter.chats);
+app.post("/add", loginRoute.add)
+app.post("/login",loginRoute.login)
+app.get("/getUser", loginRoute.getUser)
 
 //integrating socketio
 socket = io(http);
 
 //database connection
-const Chat = require("./models/Chat");
-const connect = require("./dbconnect");
-app.use(express.static(__dirname + "/public"));
+
+
 //setup event listener
 socket.on("connection", socket => {
   console.log("user connected");
@@ -49,14 +53,11 @@ socket.on("connection", socket => {
 
   socket.on("chat message", function(msg) {
     console.log("message==========: " + msg);
-
-    //broadcast message to everyone in port:5000 except yourself.
-    socket.broadcast.emit("received", { message: msg });
-
+    socket.emit("chat message", msg);
     //save chat to the database
     connect.then(db => {
       console.log("connected correctly to the server");
-      let chatMessage = new Chat({ message: msg, sender: "Anonymous",receiver: "abcd" });
+      let chatMessage = new Chat({ message: msg, sender: "Anonymous",receiver: "empty" });
       chatMessage.save();
     });
   });
@@ -65,3 +66,4 @@ socket.on("connection", socket => {
 http.listen(port, () => {
   console.log("Running on Port: " + port);
 });
+
