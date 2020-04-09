@@ -32,4 +32,13 @@ export default {
     .catch({ status: 500, message: "Internal Serevr Error" });
   },
 
+ getchats : () => {
+     const url = Config.baseurl + "chats";
+    return  axios.get(url)
+    .then(response => {
+      
+       return response.data;
+    })
+    .catch({ status: 500, message: "Internal Serevr Error" });
+  },
 };

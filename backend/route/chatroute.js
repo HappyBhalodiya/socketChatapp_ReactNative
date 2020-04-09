@@ -10,7 +10,7 @@ router.chats = function (req, res) {
       connectdb.then(db => {
     let data = Chats.find({ message: "Anonymous" });
     Chats.find({}).then(chat => {
-        console.log("chat====",chat)
+        // console.log("chat====",chat)
       res.json(chat);
     });
   });

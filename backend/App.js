@@ -32,7 +32,7 @@ socket = io(http);
 
 //setup event listener
 socket.on("connection", socket => {
-  console.log("user connected");
+  console.log("user connected",  socket.id);
 
   socket.on("disconnect", function() {
     console.log("user disconnected");
@@ -51,13 +51,14 @@ socket.on("connection", socket => {
     socket.broadcast.emit("notifyStopTyping");
   });
 
-  socket.on("chat message", function(msg) {
-    console.log("message==========: " + msg);
-    socket.emit("chat message", msg);
+  socket.on("chat message", function(res) {
+    
+    console.log("message==========: " + JSON.stringify(res[0].msg), JSON.stringify(res[0].senderid));
+    socket.emit("chat message", res[0].msg);
     //save chat to the database
     connect.then(db => {
       console.log("connected correctly to the server");
-      let chatMessage = new Chat({ message: msg, sender: "Anonymous",receiver: "empty" });
+      let chatMessage = new Chat({ message: res[0].msg, sender: res[0].senderid,receiver: res[0].receiver });
       chatMessage.save();
     });
   });
