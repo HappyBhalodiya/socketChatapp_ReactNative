@@ -76,7 +76,7 @@ class Chat extends React.Component {
         if(chatMessage.receiver == this.props.navigation.state.params.id && chatMessage.sender == value){
           console.log("call=====ifff========")
           return (<Text key={chatMessage} style={{ alignSelf: 'flex-end'}}>{chatMessage.message}</Text>)
-        }else if(this.props.navigation.state.params.id ==  chatMessage.sender ){
+        }else if(this.props.navigation.state.params.id ==  chatMessage.sender){
           console.log("call=====elsee========")
           return (<Text key={chatMessage} style={{ alignSelf: 'flex-start'}}>{chatMessage.message}</Text>)
         }
