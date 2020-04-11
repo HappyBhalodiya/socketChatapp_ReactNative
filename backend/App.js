@@ -30,41 +30,78 @@ socket = io(http);
 //database connection
 
 
+
 //setup event listener
-socket.on("connection", socket => {
-  console.log("user connected",  socket.id);
+socket.on("connection", function(socket)  {
+  const sessionID = socket.id;
+  console.log("user connected", sessionID);
+  socket.on('join', function (data) {    
+    console.log("data>>>>>>>>>>>",data)
+    socket.join(data.id);
+    
+    socket.on("chat message", function(res) {
+      console.log("res====>>>>", res)
+      socket.to(data.id).emit('message', {msg: res.msg, id: data.id});
+
+      connect.then(db => {
+        console.log("connected correctly to the server");
+        let chatMessage = new Chat({ message: res.msg, sender: res.senderID ,receiver: data.id });
+        chatMessage.save();
+      });
+    });
+  });
 
   socket.on("disconnect", function() {
     console.log("user disconnected");
-  });
-
-  //Someone is typing
-  socket.on("typing", data => {
-    socket.broadcast.emit("notifyTyping", {
-      user: data.user,
-      message: data.message
-    });
-  });
-
-  //when soemone stops typing
-  socket.on("stopTyping", () => {
-    socket.broadcast.emit("notifyStopTyping");
-  });
-
-  socket.on("chat message", function(res) {
-    
-    console.log("message==========: " + JSON.stringify(res[0].msg), JSON.stringify(res[0].senderid));
-    socket.emit("chat message", res[0].msg);
-    //save chat to the database
-    connect.then(db => {
-      console.log("connected correctly to the server");
-      let chatMessage = new Chat({ message: res[0].msg, sender: res[0].senderid,receiver: res[0].receiver });
-      chatMessage.save();
-    });
   });
 });
 
 http.listen(port, () => {
   console.log("Running on Port: " + port);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // //Someone is typing
+  // socket.on("typing", data => {
+  //   socket.broadcast.emit("notifyTyping", {
+  //     user: data.user,
+  //     message: data.message
+  //   });
+  // });
+
+  // //when soemone stops typing
+  // socket.on("stopTyping", () => {
+  //   socket.broadcast.emit("notifyStopTyping");
+  // });
 

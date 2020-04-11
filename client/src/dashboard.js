@@ -9,8 +9,9 @@ import {
 
 } from "react-native";
 import Api from "../service";
+import AsyncStorage from '@react-native-community/async-storage';
 
-
+let value;
 class Dashboard extends React.Component {
   constructor(props){
     super(props);
@@ -19,7 +20,8 @@ class Dashboard extends React.Component {
 
     };
   }
-  componentDidMount = () => {
+  componentDidMount = async() => {
+    value = await  AsyncStorage.getItem('userid');
 
     Api.getAllUser()
     .then((res) =>{
@@ -29,16 +31,23 @@ class Dashboard extends React.Component {
     });
   }
   render() {
-      const { navigate } = this.props.navigation;
-    return (
-      <View style={styles.container}>
-      {
-        this.state.allUser.map((res,index) =>
+    const { navigate } = this.props.navigation;
+
+
+    const allusers = this.state.allUser.map((res,index) => {
+      if(res._id != value){
+        return (
+
           <TouchableOpacity  style={styles.cardView} onPress={() => navigate("Chat",{id:res._id})}>
           <Text>{res.username}</Text>
           </TouchableOpacity>
           )
       }
+    })
+
+    return (
+      <View style={styles.container}>
+      {allusers}
       </View>
       );
   }
