@@ -22,7 +22,6 @@ class Chat extends React.Component {
     super(props);
     this.state = {
       chatMessage: "",
-      chatMessages: [],
       chats:[]
 
     };
@@ -36,18 +35,6 @@ class Chat extends React.Component {
       console.log("connected=========",)
       socket.emit('join', {id: id});
     });
-
-    // socket.on("message", function(data) {
-    //   console.log("=message====", data);
-
-    //   this.setState(prevState =>({
-    //     chatMessages: [...prevState.chatMessages, data.msg]
-    //   }))
-    // });
-    // socket.on("chat message", msg => {
-      //   console.log("====>>>>>===",msg)
-      //   this.setState({ chatMessages : [...this.state.chatMessages, msg]});
-      // });
 
       Api.getchats()
       .then((res) =>{
@@ -69,14 +56,14 @@ class Chat extends React.Component {
     }
 
     render() {
-
+     console.log("call====");
 
       const chatMessages = this.state.chats.map(chatMessage => {
 
         if(chatMessage.receiver == this.props.navigation.state.params.id && chatMessage.sender == value){
           console.log("call=====ifff========")
           return (<Text key={chatMessage} style={{ alignSelf: 'flex-end'}}>{chatMessage.message}</Text>)
-        }else if(this.props.navigation.state.params.id ==  chatMessage.sender){
+        }else if(this.props.navigation.state.params.id ==  chatMessage.sender && (chatMessage.sender == value || chatMessage.receiver == value)){
           console.log("call=====elsee========")
           return (<Text key={chatMessage} style={{ alignSelf: 'flex-start'}}>{chatMessage.message}</Text>)
         }
