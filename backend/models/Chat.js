@@ -11,11 +11,15 @@ const chatSchema = new Schema(
     },
     receiver: {
       type:String
-    } 
+    },
+   
   },
   {
     timestamps: true
-  }
+  },
+  
+  
+ 
 );
 
 let Chat = mongoose.model("theChat", chatSchema);

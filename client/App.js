@@ -1,42 +1,55 @@
-
-import React, {Component} from "react";
-import RegisterRoutes from "./src/registerroutes";
-import MainRoutes from "./src/mainRouts";
+import React, { useState, useEffect } from 'react'
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import Login from './screen/login'
+import Register from './screen/register'
+import Dashboard from './screen/dashboard'
+import Chat from './screen/chat'
 import AsyncStorage from '@react-native-community/async-storage';
 
-export default class App extends React.Component {
 
-  constructor(props){
-    super(props);
-    this.state = {
-      value: [],
+const Stack = createStackNavigator();
+let userid;
+function App() {
+	const useMountEffect = (fun) => useEffect(fun, [])
+	useMountEffect(() => {
+		datarenderfunction()
+	})
+	datarenderfunction = async () => {
+		
+		userid = await  AsyncStorage.getItem('userid');
+		console.log("==================", userid)
+	}
+	if(userid == '' || userid == undefined){
+		console.log("ifffff")
+		return (
+			<NavigationContainer>
+			<Stack.Navigator  initialRouteName="Login">
+			<Stack.Screen name="Login" component={Login} />
+			<Stack.Screen name="Register" component={Register} />
+			<Stack.Screen name="Dashboard" component={Dashboard} />
+			<Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }}/>
+			</Stack.Navigator>
+			</NavigationContainer>
+			);
+	}else{
+		console.log("call else")
+console.log("================else==", userid)
+		return (
+			<NavigationContainer>
+			<Stack.Navigator  initialRouteName="Dashboard">
+			<Stack.Screen name="Dashboard" component={Dashboard} />
+			<Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }}/>
+			<Stack.Screen name="Login" component={Login} />
+			<Stack.Screen name="Register" component={Register} />
+			
 
-    };
-  }
-  componentDidMount= async()=>{
-  
-    const value = await  AsyncStorage.getItem('userid');
-    if (value !== null) {
-      console.log("appjs  ==",value);
-      this.setState({value: value});       
-    }  
+			</Stack.Navigator>
+			</NavigationContainer>
+			);
+	}
 
-  }
-  render() {
-  console.log(this.state.value == '')
-  if(this.state.value == ''){
-    return(
-      <>
-      <RegisterRoutes />
-      </>
-    )
-     
-    }else{
-      return(
-        <>
-          <MainRoutes />
-        </>
-        )
-    }
-  }
 }
+
+export default App;
+

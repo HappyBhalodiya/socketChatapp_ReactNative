@@ -1,5 +1,5 @@
 {
-  "name": "chatapp",
+  "name": "chat",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -7,31 +7,32 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "android-dev": "adb reverse tcp:8081 tcp:8081 && react-native run-android"
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.9.0",
-    "@react-native-community/masked-view": "^0.1.7",
+    "@react-native-community/masked-view": "^0.1.8",
+    "@react-navigation/native": "^5.1.5",
+    "@react-navigation/stack": "^5.2.10",
     "axios": "^0.19.2",
+    "native-base": "^2.13.12",
     "react": "16.11.0",
-    "react-native": "0.62.1",
+    "react-native": "0.62.2",
     "react-native-gesture-handler": "^1.6.1",
-    "react-native-gifted-chat": "^0.13.0",
     "react-native-safe-area-context": "^0.7.3",
     "react-native-screens": "^2.4.0",
-    "react-native-simple-toast": "^1.0.0",
+    "react-native-simple-toast": "^1.1.0",
     "react-native-vector-icons": "^6.6.0",
-    "react-navigation": "^4.3.7",
-    "react-navigation-stack": "^2.3.11",
     "socket.io-client": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/runtime": "^7.9.2",
     "@react-native-community/eslint-config": "^1.0.0",
-    "babel-jest": "^25.2.6",
+    "babel-jest": "^25.3.0",
     "eslint": "^6.8.0",
-    "jest": "^25.2.7",
+    "jest": "^25.3.0",
     "metro-react-native-babel-preset": "^0.59.0",
     "react-test-renderer": "16.11.0"
   },

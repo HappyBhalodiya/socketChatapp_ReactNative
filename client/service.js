@@ -8,6 +8,7 @@ export default {
     return axios
     .post(url,body)
     .then(response => {
+     
       return JSON.stringify(response);
     })
     .catch(err => {
