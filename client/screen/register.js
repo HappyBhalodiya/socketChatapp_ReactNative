@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View,Text, TouchableOpacity, StyleSheet, ScrollView ,Image, TextInput} from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, TextInput } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from '@react-native-community/async-storage';
@@ -14,7 +14,7 @@ function Register({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
-  const [profilePhoto , setProfilePhoto] = useState(null)
+  const [profilePhoto, setProfilePhoto] = useState(null)
   const [profilePhotoName, setProfilePhotoName] = useState('')
   const options = {
     allowsEditing: true,
@@ -25,72 +25,72 @@ function Register({ navigation }) {
       path: '',
     },
   };
-  const AddData =() => {
+  const AddData = () => {
 
     let body = {
       email: email,
       password: password,
       username: username
     }
-    if(profilePhoto == null) {
-      console.log("profilePhoto call if",profilePhoto)
+    if (profilePhoto == null) {
+      console.log("profilePhoto call if", profilePhoto)
       Api.addUser(body)
-      .then((res) =>{
-        console.log("=======res====",res)
-        Toast.show("successfully Data added.");
-        navigation.navigate('Login')
-        setUsername('');
-        setEmail('');
-        setPassword('');
+        .then((res) => {
+          console.log("=======res====", res)
+          Toast.show("successfully Data added.");
+          navigation.navigate('Login')
+          setUsername('');
+          setEmail('');
+          setPassword('');
 
-      })
-      .catch(err => {
-        console.log("errr=====",err)
-      });
-    }else{
+        })
+        .catch(err => {
+          console.log("errr=====", err)
+        });
+    } else {
       const url = Config.baseurl + "add";
 
       console.log("call else", url)
       RNFetchBlob.fetch('POST', url, {
-        'Content-Type' : 'multipart/form-data',
+        'Content-Type': 'multipart/form-data',
       },
-      [
-      {
-        name : 'email',
-        data: email
-      },
-      {
-        name : 'password',
-        data: password
-      },
-      {
-        name : 'username',
-        data: username
-      },
-      {
-        name : 'profileimage',
-        filename :profilePhotoName,
-        data: RNFetchBlob.wrap(profilePhoto)
-      },
+        [
+          {
+            name: 'email',
+            data: email
+          },
+          {
+            name: 'password',
+            data: password
+          },
+          {
+            name: 'username',
+            data: username
+          },
+          {
+            name: 'profileimage',
+            filename: profilePhotoName,
+            data: RNFetchBlob.wrap(profilePhoto)
+          },
 
-      ]).then((res) => {
+        ]).then((res) => {
 
-        var resp = JSON.parse(res.data);
-        console.log("yessss   uploaded",resp);
-        Toast.show("successfully Data added.");
-        navigation.navigate('Login')
-        setUsername('');
-        setEmail('');
-        setPassword('');
+          var resp = JSON.parse(res.data);
+          console.log("yessss   uploaded", resp);
+          Toast.show("successfully Data added.");
+          navigation.navigate('Login')
+          setUsername('');
+          setEmail('');
+          setPassword('');
 
-      })
-      .catch((err) => {
-        console.log(err);
-      })
+        })
+        .catch((err) => {
+          console.log(err);
+        })
     }
   }
-  
-  
+
+
   const pickImage = () => {
     console.log("call pickimage")
     ImagePicker.launchImageLibrary(options, (response) => {
@@ -102,7 +102,7 @@ function Register({ navigation }) {
         console.log('ImagePicker Error: ', response.error);
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
-      } 
+      }
       else {
         const source = { uri: response.uri }
         setProfilePhoto(response.uri)
@@ -111,116 +111,102 @@ function Register({ navigation }) {
     });
   };
   const profilepicFun = () => {
-    if(profilePhoto == null) {
-      return(
+      return (
         <View>
-        <Image style={styles.img} source={require('../assets/userpic.jpg')} />
-        <TouchableOpacity style={[styles.buttonContainer,styles.ChoosePhotoButton]} onPress={() => pickImage()}>
-        <Text style={styles.ChoosePhotoText}>Choose Photo</Text>
-        </TouchableOpacity>
-        </View> 
-        )
+          <Image style={styles.img} source={profilePhoto ? {uri :profilePhoto } : require('../assets/userpic.jpg')} />
+          <TouchableOpacity style={[styles.buttonContainer, styles.ChoosePhotoButton]} onPress={() => pickImage()}>
+            <Text style={styles.ChoosePhotoText}>Choose Photo</Text>
+          </TouchableOpacity>
+        </View>
+      )
     }
-
-    else{
-      return(
-        <View>
-        <Image style={styles.img} source={{uri: profilePhoto}} />
-        <TouchableOpacity style={[styles.buttonContainer,styles.ChoosePhotoButton]} onPress={() => pickImage()}>
-        <Text style={styles.ChoosePhotoText}>Choose Photo</Text>
-        </TouchableOpacity>
-        </View> 
-        )
-    }
-  }
-
   return (
     <View style={{ flex: 1 }}>
-    <View
-    style={{
-      flexDirection: "column",
-      flex: 4
-    }}
-    />
-    <View
-    style={{
-      flexDirection: "column",
-      flex: 7,
-      justifyContent: "center",
-      alignItems: "center"
-    }}
-    >
+      <View
+        style={{
+          flexDirection: "column",
+          flex: 4
+        }}
+      />
+      <View
+        style={{
+          flexDirection: "column",
+          flex: 7,
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
 
-    <View style={styles.profilePic}>
-    {profilepicFun()}
-    
-    </View>
+        <View style={styles.profilePic}>
+          {profilepicFun()}
 
-    <View style={styles.inputContainer}>
-    <Icon name={"lock-outline"} size={20} color="#606060" style={{ margin: 10 }} />
-    <TextInput
-    style={styles.inputs}
-    placeholder="username"
-    underlineColorAndroid="transparent"
-    onChangeText={text => setUsername(text)}
-    />
-    </View>
-    <View style={styles.inputContainer}>
-    <Icon name={"email"} size={20} color="#606060" style={{ margin: 10 }} />
+        </View>
 
-    <TextInput
-    style={styles.inputs}
-    placeholder="Email"
-    keyboardType="email-address"
-    underlineColorAndroid="transparent"
-    onChangeText={text => setEmail(text)}
-    />
-    </View>
+        <View style={styles.inputContainer}>
+          <Icon name={"lock-outline"} size={20} color="#606060" style={{ margin: 10 }} />
+          <TextInput
+            style={styles.inputs}
+            placeholder="username"
+            underlineColorAndroid="transparent"
+            onChangeText={text => setUsername(text)}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Icon name={"email"} size={20} color="#606060" style={{ margin: 10 }} />
 
-    <View style={styles.inputContainer}>
-    <Icon name={"lock-outline"} size={20} color="#606060" style={{ margin: 10 }} />
-    <TextInput
-    style={styles.inputs}
-    placeholder="Password"
-    secureTextEntry={true}
-    underlineColorAndroid="transparent"
-    onChangeText={text => setPassword(text)}
-    />
-    </View>
+          <TextInput
+            style={styles.inputs}
+            placeholder="Email"
+            keyboardType="email-address"
+            underlineColorAndroid="transparent"
+            onChangeText={text => setEmail(text)}
+          />
+        </View>
 
-    <View style={styles.inputContainer1}>
-    <TouchableOpacity
-    style={[styles.buttonContainer, styles.loginButton]}
-    onPress={() => AddData()}
-    >
-    <Text style={styles.signUpText}>Register</Text>
-    </TouchableOpacity>
-    </View>
+        <View style={styles.inputContainer}>
+          <Icon name={"lock-outline"} size={20} color="#606060" style={{ margin: 10 }} />
+          <TextInput
+            style={styles.inputs}
+            placeholder="Password"
+            secureTextEntry={true}
+            underlineColorAndroid="transparent"
+            onChangeText={text => setPassword(text)}
+          />
+        </View>
 
-    <View style={styles.inputContainer1}>
-    <Text
-    style={{ fontWeight: "bold", fontSize: 15, color: "silver" }}
-    >
+        <View style={styles.inputContainer1}>
+          <TouchableOpacity
+            style={[styles.buttonContainer, styles.loginButton]}
+            onPress={() => AddData()}
+          >
+            <Text style={styles.signUpText}>Register</Text>
+          </TouchableOpacity>
+        </View>
 
-    Already have an account.
+        <View style={styles.inputContainer1}>
+          <Text
+            style={{ fontWeight: "bold", fontSize: 15, color: "silver" }}
+          >
+
+            Already have an account.
     </Text>
-    <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-    <Text style={{ fontSize: 15, fontWeight: "bold" }}>
-    Log in
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+              Log in
     </Text>
-    </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
+
+      </View>
+      <View
+        style={{
+          flexDirection: "column",
+          flex: 4
+        }}
+      />
     </View>
 
-    </View>
-    <View
-    style={{
-      flexDirection: "column",
-      flex: 4
-    }}
-    />
-    </View>
-
-    );
+  );
 }
 
 export default Register;
@@ -285,10 +271,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 40
   },
-  profilePic:{
+  profilePic: {
     alignItems: 'center',
     justifyContent: 'center',
-    
+
   },
   img: {
     height: 170,
@@ -296,14 +282,14 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     alignItems: 'center',
     borderColor: '#e7e7e7',
-    borderBottomWidth:5
+    borderBottomWidth: 5
   },
   ChoosePhotoText: {
     color: 'white'
   },
   ChoosePhotoButton: {
     backgroundColor: "#372e5f",
-    justifyContent:'center',
-    alignItems:'center'
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 });

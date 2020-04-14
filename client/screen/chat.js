@@ -1,24 +1,47 @@
 import React, { useState, useEffect } from 'react'
-import { View, TouchableOpacity,Text, StyleSheet, ScrollView ,Image, TextInput} from 'react-native'
+import { View, TouchableOpacity, Text, StyleSheet, ScrollView, Image, TextInput, ImageBackground } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from '@react-native-community/async-storage';
 import Api from "../service";
-import io from "socket.io-client";
+import Config from "../config";
 
+import io from "socket.io-client";
 import { Container, Header, Content, Card, CardItem, Body } from 'native-base';
-let value ;
+let value;
 let socket;
 let theDate;
-function Chat({route, navigation }) {
+let profilepic;
+function Chat({ route, navigation }) {
 
   const [chats, setChats] = useState([])
   const [socketId, setSocketId] = useState('')
   const [chatMessage, setChatMessage] = useState('')
-
-
-
   const useMountEffect = (fun) => useEffect(fun, [])
+
+  //   useEffect(() => {
+    //   const interval = setInterval(() => {
+
+      //     socket = io.connect("http://192.168.43.176:5000")
+      //     socket.on('connect', function () {
+
+        //       setSocketId(socket.id);
+
+        //       socket.emit('join', { id: route.params.userclickid });
+        //     });
+
+        //     Api.getchats()
+        //       .then((res) => {
+          //         setChats(res)
+          //         { chatMessages }
+          //       })
+          //       .catch(err => {
+            //       });
+            //   }, 10000);
+            //   return () => clearInterval(interval);
+            // }, []);
+
+
     /**
   * call first time when screen render
   */
@@ -46,10 +69,12 @@ function Chat({route, navigation }) {
     });
 
   }
-  const  submitChatMessage = async() => {
-    value = await  AsyncStorage.getItem('userid');
 
-    socket.emit('chat message', {msg: chatMessage , senderID: value});
+  const submitChatMessage = async () => {
+    value = await AsyncStorage.getItem('userid');
+    profilepic = await AsyncStorage.getItem('userprofile');
+
+    socket.emit('chat message', { msg: chatMessage, senderID: value });
     // socket.emit("chat message", array);
     setChatMessage('')
     datarenderfunction()
@@ -59,55 +84,64 @@ function Chat({route, navigation }) {
   const chatMessages = chats.map(chatMessage => {
 
 
-    theDate = new Date( Date.parse(chatMessage.createdAt));
+    theDate = new Date(Date.parse(chatMessage.createdAt));
     theDate.toLocaleTimeString()
 
-    if(chatMessage.receiver == route.params.userclickid && chatMessage.sender == value){
-
+    if (chatMessage.receiver == route.params.userclickid && chatMessage.sender == value) {
       return (
+        <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
+
         <View style={styles.sendermsg}>
+        
+        <Text key={chatMessage} style={{ marginRight: 50 }}>{chatMessage.message}</Text>
         <Text key={chatMessage}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
-        <Text key={chatMessage} style={{ marginLeft:50}}>{chatMessage.message}</Text>
+        </View>
+        <Image style={styles.img} source={{ uri: Config.mediaurl + profilepic }} />
         </View>
         )
-    }else if(route.params.userclickid ==  chatMessage.sender && (chatMessage.sender == value || chatMessage.receiver == value)){
+    } else if (route.params.userclickid == chatMessage.sender && (chatMessage.sender == value || chatMessage.receiver == value)) {
 
       return (
+        <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
+        <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
         <View style={styles.receivermsg}>
-        <Text key={chatMessage} style={{ marginRight:50}}>{chatMessage.message}</Text>
+        
+        <Text key={chatMessage} style={{ marginRight: 50 }}>{chatMessage.message}</Text>
         <Text key={chatMessage}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+        </View>
         </View>
         )
     }
-
   }
   );
 
-
   return (
     <View style={styles.container}>
-    <Header style={{ backgroundColor: '#eeeeee',height:45}}> 
-    <TouchableOpacity style={{flexDirection:'column', flex:1}} onPress={() => navigation.navigate('Dashboard')} >
- 
+    <Header style={{ backgroundColor: '#306E5E', height: 45 }}>
+    <TouchableOpacity style={{ flexDirection: 'column', flex: 1 }} onPress={() => navigation.navigate('Dashboard')} >
+
     <Icon
-        name={"keyboard-backspace"}
-        size={30}
-        color="#000"
-        style={{ marginLeft:8 , marginTop:6}}
-        />
-    
+    name={"keyboard-backspace"}
+    size={30}
+    color="#fff"
+    style={{ marginLeft: 8, marginTop: 6 }}
+    />
     </TouchableOpacity>
-    <View style={{flexDirection:'column', flex:2}}>
-    <Image style={styles.img} source={{uri: route.params.userclickimg}}/>
-    </View> 
-    <View style={{flexDirection:'column',flex:10}}>
+    <View style={{ flexDirection: 'column', flex: 2 }}>
+    <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
+    </View>
+    <View style={{ flexDirection: 'column', flex: 10 }}>
     <Text style={styles.headertext}>{route.params.userclickname}</Text>
 
-    </View>   
+    </View>
     </Header>
-    <View style={{flex:6}}>
+    <ImageBackground style={ styles.imgBackground } 
+    resizeMode='cover' 
+    source={require('../assets/bg.jpeg')}>
+
+    <View style={{ flex: 6 }}>
     <ScrollView>
-    <View style={{backgroundColor:'white', flex:1}}>
+    <View>
     {chatMessages}
     </View>
     </ScrollView>
@@ -136,87 +170,89 @@ function Chat({route, navigation }) {
     </View>
 
     </View>
+    </ImageBackground>
     </View>
     )
 }
 export default Chat;
 const styles = StyleSheet.create({
-  container:{
+  container: {
     flex: 1,
-    backgroundColor:'#e7e7e7'
   },
-  cardView : {
-    elevation :3,
-    padding: 10, 
-    margin:5, 
-    backgroundColor:"#fff"
+  cardView: {
+    elevation: 3,
+    padding: 10,
+    margin: 5,
+    backgroundColor: "#fff"
   },
   headertext: {
     fontSize: 20,
-    color:'#000',
-    marginTop:10
+    color: '#fff',
+    marginTop: 10
   },
-  footer:{
+  footer: {
     flexDirection: 'row',
-    height:'auto',
-    backgroundColor: '#eeeeee',
-    paddingHorizontal:10,
-    padding:5,
+    height: 'auto',
+
+    paddingHorizontal: 10,
+    padding: 5,
   },
   inputContainer: {
     borderBottomColor: '#F5FCFF',
     backgroundColor: '#FFFFFF',
-    borderRadius:30,
+    borderRadius: 30,
     borderBottomWidth: 1,
-    height:'auto',
+    height: 'auto',
     flexDirection: 'row',
-    alignItems:'center',
-    flex:1,
-    marginRight:10,
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
   },
-  inputs:{
-    height:'auto',
-    marginLeft:16,
+  inputs: {
+    height: 'auto',
+    marginLeft: 16,
     borderBottomColor: '#FFFFFF',
-    flex:1,
+    flex: 1,
   },
-  btnSend:{
-    backgroundColor:"#000",
-    width:40,
-    height:40,
-    borderRadius:360,
-    alignItems:'center',
-    justifyContent:'center',
+  btnSend: {
+    backgroundColor: "#306E5E",
+    width: 40,
+    height: 40,
+    borderRadius: 360,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sendermsg:{
-    margin:5,
-    elevation:5, 
-    borderRadius:30, 
-    borderBottomWidth: 1,
-    borderBottomColor: '#F5FCFF',
+  sendermsg: {
+    margin: 5,
+    elevation: 5,
     padding: 10,
-    backgroundColor:'#eeeeee',
-    flexDirection: 'row',
+    backgroundColor: '#E0F6C7',
+    borderRadius:5,
+    flexDirection: 'column',
     alignSelf: 'flex-end'
   },
-  receivermsg:{
-    margin:5,
-    elevation:5, 
-    borderRadius:30, 
-    borderBottomWidth: 1,
-    borderBottomColor: '#F5FCFF',
+  receivermsg: {
+    margin: 5,
+    elevation: 5,
     padding: 10,
-    backgroundColor:'#eeeeee',
-    flexDirection: 'row',
+    borderRadius:5,
+    backgroundColor: '#eeeeee',
+    flexDirection: 'column',
     alignSelf: 'flex-start'
   },
-   img: {
+  img: {
     height: 35,
     width: 35,
     borderRadius: 50,
     alignItems: 'center',
     borderColor: '#e7e7e7',
-    margin:5
+    margin: 5
   },
+  imgBackground: {
+    width: '100%',
+    height: '100%',
+    flex: 1 ,
+  },
+
 
 })
