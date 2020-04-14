@@ -46,11 +46,7 @@ function Login({ navigation }) {
             alignItems: "center"
         }}
         >
-        <Text
-        style={{ fontSize: 20, fontWeight: "bold", marginBottom: 20 }}
-        >
-        Log in{" "}
-        </Text>
+       
         <View style={styles.inputContainer}>
         <Icon
         name={"email-outline"}

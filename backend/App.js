@@ -3,6 +3,8 @@ const app = express();
 const bodyParser = require("body-parser");
 var chatRouter = require("./route/chatroute");
 var loginRoute = require("./route/loginroute")
+const fileUpload = require('./middleware/file_upload');
+
 //require the http module
 const http = require("http").Server(app);
 var cors = require('cors');
@@ -20,7 +22,7 @@ app.use(bodyParser.json());
 
 //routes
 app.get("/chats", chatRouter.chats);
-app.post("/add", loginRoute.add)
+app.post("/add",fileUpload.upload('profileimage'), loginRoute.add)
 app.post("/login",loginRoute.login)
 app.get("/getUser", loginRoute.getUser)
 

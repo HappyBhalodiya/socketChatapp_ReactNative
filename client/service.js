@@ -4,11 +4,13 @@ import axios from 'axios';
 export default {
 
   addUser: body => {
+
     const url = Config.baseurl + "add";
+       console.log("body===", body, url)
     return axios
     .post(url,body)
     .then(response => {
-     
+     console.log("+++++++++++++++++++",response)
       return JSON.stringify(response);
     })
     .catch(err => {

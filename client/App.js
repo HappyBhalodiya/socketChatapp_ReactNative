@@ -10,7 +10,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 const Stack = createStackNavigator();
 let userid;
-function App() {
+function App () {
 	const useMountEffect = (fun) => useEffect(fun, [])
 	useMountEffect(() => {
 		datarenderfunction()
