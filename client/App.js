@@ -24,10 +24,11 @@ function App () {
 		console.log("ifffff")
 		return (
 			<NavigationContainer>
-			<Stack.Navigator  initialRouteName="Login">
+			<Stack.Navigator  initialRouteName="Dashboard">
+			<Stack.Screen name="Dashboard" component={Dashboard} />
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Register" component={Register} />
-			<Stack.Screen name="Dashboard" component={Dashboard} />
+			
 			<Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }}/>
 			</Stack.Navigator>
 			</NavigationContainer>
@@ -52,4 +53,3 @@ console.log("================else==", userid)
 }
 
 export default App;
-
