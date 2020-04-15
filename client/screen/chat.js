@@ -63,18 +63,31 @@ function Chat({ route, navigation }) {
     Api.getchats()
     .then((res) =>{
       setChats(res)
-      {chatMessages}
     })
     .catch(err => {
     });
-
   }
 
   const submitChatMessage = async () => {
     value = await AsyncStorage.getItem('userid');
     profilepic = await AsyncStorage.getItem('userprofile');
 
-    socket.emit('chat message', { msg: chatMessage, senderID: value });
+
+      socket.emit('chat message', { msg: chatMessage, senderID: value});
+    
+    const chatMessages = chats.length != null ? chats.map(chatMessage => {
+
+      if(chatMessage.receiver == value && chatMessage.sender == route.params.userclickid ){
+        console.log("call=============if=====status")
+        socket.emit("msgStatus",  {msgid : chatMessage._id, status:true})
+      }
+      else{
+        console.log("call=============else=====status")
+
+        socket.emit("msgStatus",  {msgid : chatMessage._id, status:false})
+
+      }
+    }) : null
     // socket.emit("chat message", array);
     setChatMessage('')
     datarenderfunction()
@@ -87,14 +100,23 @@ function Chat({ route, navigation }) {
     theDate = new Date(Date.parse(chatMessage.createdAt));
     theDate.toLocaleTimeString()
 
+
     if (chatMessage.receiver == route.params.userclickid && chatMessage.sender == value) {
+      console.log("==============", chatMessage.status)
       return (
         <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
 
         <View style={styles.sendermsg}>
         
-        <Text key={chatMessage} style={{ marginRight: 50 }}>{chatMessage.message}</Text>
-        <Text key={chatMessage}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+        <Text key={chatMessage} style={{ marginRight: 50, fontSize:16 }}>{chatMessage.message}</Text>
+        <View style={{flexDirection:'row'}}>
+       <View style={{alignSelf:'flex-start', flexDirection:'column', flex:8}}> 
+       <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+       </View>
+       <View style={{alignSelf:'flex-end',flexDirection:'column',flex:1}}>
+        <Image style={{width:10, height:10}} source={ chatMessage.status == false ? require('../assets/gray.png') : require('../assets/blue.png') } />
+       </View>
+        </View>
         </View>
         <Image style={styles.img} source={{ uri: Config.mediaurl + profilepic }} />
         </View>
@@ -106,8 +128,8 @@ function Chat({ route, navigation }) {
         <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
         <View style={styles.receivermsg}>
         
-        <Text key={chatMessage} style={{ marginRight: 50 }}>{chatMessage.message}</Text>
-        <Text key={chatMessage}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+        <Text key={chatMessage} style={{ marginRight: 50, fontSize:16 }}>{chatMessage.message}</Text>
+        <Text key={chatMessage}  style={styles.receivertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
         </View>
         </View>
         )
@@ -253,6 +275,14 @@ const styles = StyleSheet.create({
     height: '100%',
     flex: 1 ,
   },
+  receivertime:{
+    color:'#999999',
+    fontSize:12
+  },
+  sendertime:{
+    fontSize:12,
+    color:'#859B74'
+  }
 
 
 })

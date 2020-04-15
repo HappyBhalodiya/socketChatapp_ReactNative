@@ -12,6 +12,9 @@ const chatSchema = new Schema(
     receiver: {
       type:String
     },
+    status: {
+      type: Boolean, default: false
+    }
    
   },
   {

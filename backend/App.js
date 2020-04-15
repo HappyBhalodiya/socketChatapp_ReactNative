@@ -36,20 +36,31 @@ socket = io(http);
 //setup event listener
 socket.on("connection", function(socket)  {
   const sessionID = socket.id;
-  console.log("user connected", sessionID);
+  console.log("user connected");
   socket.on('join', function (data) {    
     console.log("data>>>>>>>>>>>",data)
     socket.join(data.id);
     
     socket.on("chat message", function(res) {
+
       console.log("res====>>>>", res)
       socket.to(data.id).emit('message', {msg: res.msg, id: data.id});
-
+      socket.on("msgStatus", function(status) {
+        console.log("====status=======",res.msg,"=====", status.status, status.msgid)
+        if(status.status !== false){
+          connect.then(db => {
+            Chat.findByIdAndUpdate({ _id: status.msgid }, { $set: { status: status.status } }, { upsert: true, new: true }, function (err, user) {
+              console.log("update user", user);
+            })
+          });
+        }
+      })
       connect.then(db => {
-        console.log("connected correctly to the server");
+        console.log("connected correctly to the server", res.msg);
         let chatMessage = new Chat({ message: res.msg, sender: res.senderID ,receiver: data.id });
         chatMessage.save();
       });
+      
     });
   });
 
