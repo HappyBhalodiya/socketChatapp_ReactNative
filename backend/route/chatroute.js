@@ -16,4 +16,28 @@ router.chats = function (req, res) {
   });
 }
 
+router.sendFile = function (req, res) {
+  console.log("req.body===========",req.body, req.file)
+
+  const sendData = req.file != undefined ?{
+     
+     sender: req.body.sender,
+    receiver: req.body.receiver,
+    message: req.body.message,
+    sendfile: req.file.originalname,
+    path:req.file.path
+  }: null
+  connectdb.then(db => {
+    var send = new Chats(sendData);
+    send.save(function (err, savedUser) {
+
+      console.log("+++++++++++++++++",savedUser)      
+      return res.status(200).json({ message : "Show User" , result: { User: savedUser}} )
+      
+    })
+  })
+
+}
+
+
 module.exports = router;

@@ -14,7 +14,9 @@ const chatSchema = new Schema(
     },
     status: {
       type: Boolean, default: false
-    }
+    },
+    sendfile:{ type: String, default: '' },
+    path:{type: String, default:''},
    
   },
   {

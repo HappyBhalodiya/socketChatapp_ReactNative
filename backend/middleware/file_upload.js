@@ -5,6 +5,7 @@ const multer = require('multer');
 * @returns {Array} - Return Array Of Files With Details
 */
 const upload = (file, next) => {
+    console.log("file===========",file,next)
     if (file) {
         const storage = multer.diskStorage({
             destination: function (req, file, cb) {

@@ -58,5 +58,3 @@ controller.getUser = function (req, res) {
 }
 
 module.exports = controller;
-
-

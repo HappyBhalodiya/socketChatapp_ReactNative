@@ -27,7 +27,7 @@ function App () {
 			<Stack.Navigator  initialRouteName="Dashboard">
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Register" component={Register} />
-			<Stack.Screen name="Dashboard" component={Dashboard} />
+			<Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }}/>
 			
 			<Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }}/>
 			</Stack.Navigator>
@@ -39,7 +39,7 @@ console.log("================else==", userid)
 		return (
 			<NavigationContainer>
 			<Stack.Navigator  initialRouteName="Dashboard">
-			<Stack.Screen name="Dashboard" component={Dashboard} />
+			<Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }}/>
 			<Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }}/>
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Register" component={Register} />

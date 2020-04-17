@@ -5,6 +5,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from '@react-native-community/async-storage';
 import Api from "../service";
 import Config from "../config";
+import { Container, Header, Content, Card, CardItem, Body } from 'native-base';
 
 let userid;
 function Dashboard({ navigation }) {
@@ -45,6 +46,12 @@ function Dashboard({ navigation }) {
 
   return (
     <View style={styles.container}>
+     <Header style={{ backgroundColor: '#255E55', height: 50 ,padding:5}}>
+    <View style={{ flexDirection: 'column', flex: 10 }}>
+    <Text style={styles.headertext}>Dashboard</Text>
+
+    </View>
+    </Header>
       {allusers}
     </View>
   )
@@ -53,12 +60,12 @@ export default Dashboard;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e7e7e7'
+    backgroundColor: '#fff'
   },
   cardView: {
-    elevation: 3,
-    padding: 5,
-    margin: 5,
+     borderBottomWidth: 2,
+    borderBottomColor: '#e7e7e7',
+    padding: 10,
     backgroundColor: "#fff",
     flexDirection: 'row'
   },
@@ -73,5 +80,10 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 18,
     alignItems: 'center',
-  }
+  },
+    headertext: {
+    fontSize: 20,
+    color: '#fff',
+    marginTop: 10
+  },
 })
