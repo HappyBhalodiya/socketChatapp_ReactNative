@@ -8,9 +8,10 @@ import Config from "../config";
 import RBSheet from "react-native-raw-bottom-sheet";
 import io from "socket.io-client";
 import ImagePicker from 'react-native-image-picker';
-import ImgToBase64 from 'react-native-image-base64';
 import RNFetchBlob from 'react-native-fetch-blob';
-
+import FilePickerManager from 'react-native-file-picker';
+import FileViewer from 'react-native-file-viewer';
+import RNFS from 'react-native-fs';
 import { Container, Header, Content, Card, CardItem, Body } from 'native-base';
 let value;
 let socket;
@@ -88,8 +89,6 @@ function Chat({ route, navigation }) {
         socket.emit("msgStatus",  {msgid : chatMessage._id, status:true})
       }
       else{
-        console.log("call=============else=====status")
-
         socket.emit("msgStatus",  {msgid : chatMessage._id, status:false})
 
       }
@@ -97,40 +96,41 @@ function Chat({ route, navigation }) {
     setChatMessage('')
     datarenderfunction()
   }
-const uploadFile = async(imageName,imageuri) =>{
-  value = await AsyncStorage.getItem('userid');
-  console.log("upload file hear");
-   const url = Config.baseurl + "sendFile";
+  const uploadFile = async(imageName,imageuri) =>{
+    value = await AsyncStorage.getItem('userid');
+    console.log("upload file hear=========", value,imageName,imageuri);
+    const url = Config.baseurl + "sendFile";
 
-      console.log("call else", url)
-      RNFetchBlob.fetch('POST', url, {
-        'Content-Type': 'multipart/form-data',
-      },
-        [
-          {
-            name: 'sender',
-            data: value
-          },
-          {
-            name: 'receiver',
-            data:  route.params.userclickid
-          },
-          {
-            name: 'sendfile',
-            filename: imageName,
-            data: RNFetchBlob.wrap(imageuri)
-          },
+    console.log("call else", url)
+    RNFetchBlob.fetch('POST', url, {
+      'Content-Type': 'multipart/form-data',
+    },
+    [
+    {
+      name: 'sender',
+      data: value
+    },
+    {
+      name: 'receiver',
+      data:  route.params.userclickid
+    },
+    {
+      name: 'sendfile',
+      filename: imageName,
+      data: RNFetchBlob.wrap(imageuri)
+    },
 
-        ]).then((res) => {
+    ]).then((res) => {
 
-          var resp = JSON.parse(res.data);
-          console.log("yessss   uploaded", resp);
-          submitChatMessage()
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-}
+      var resp = JSON.parse(res.data);
+      console.log("yessss   uploaded", resp);
+      submitChatMessage()
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+
+  }
 
   const launchImageLibrary = () => {
     let options = {
@@ -149,11 +149,11 @@ const uploadFile = async(imageName,imageuri) =>{
         console.log('User tapped custom button: ', response.customButton);
         alert(response.customButton);
       } else {
-        
+
         console.log("response.uri========",response.fileName)
-      await  setProfilePhoto(response.uri)
-       await setProfilePhotoName(response.fileName)
-       await uploadFile(response.fileName,response.uri)
+        await  setProfilePhoto(response.uri)
+        await setProfilePhotoName(response.fileName)
+        await uploadFile(response.fileName,response.uri)
       }
     });
   }
@@ -165,9 +165,7 @@ const uploadFile = async(imageName,imageuri) =>{
         path: 'images',
       },
     };
-    ImagePicker.launchCamera(options, (response) => {
-      console.log('Response = ', response);
-
+    ImagePicker.launchCamera(options, async(response) => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -176,197 +174,291 @@ const uploadFile = async(imageName,imageuri) =>{
         console.log('User tapped custom button: ', response.customButton);
         alert(response.customButton);
       } else {
-        const source = { uri: response.uri };
-        setProfilePhoto(response.uri)
-        setProfilePhotoName(response.fileName)
+        await  uploadFile(response.fileName,response.uri)
       }
     });
 
   }
+  const FilePicker = () => {
 
+    FilePickerManager.showFilePicker(null, async(response) => {
+      if (response.didCancel) {
+        console.log('User cancelled file picker');
+      }
+      else if (response.error) {
+        console.log('FilePickerManager Error: ', response.error);
+      }
+      else {
+        console.log("response===========",response)
+        await  uploadFile(response.fileName,response.uri)
+      }
+    });
+  }
+  const showpdf = (filepath, filename) => {
+
+    const url = Config.mediaurl + filepath;
+    const localFile = `${RNFS.DocumentDirectoryPath}/`+filename;
+    console.log("localFile",localFile)
+
+    const options = {
+      fromUrl: url,
+      toFile: localFile
+    };
+    RNFS.downloadFile(options).promise
+    .then(() => FileViewer.open(localFile))
+    .then(() => {
+      console.log("open")
+    })
+    .catch(error => {
+      console.log(error)
+    });
+
+  }
   const chatMessages = chats.map(chatMessage => {
     theDate = new Date(Date.parse(chatMessage.createdAt));
     theDate.toLocaleTimeString()
     if (chatMessage.receiver == route.params.userclickid && chatMessage.sender == value) {
-      console.log("==============", chatMessage.status)
-      if(chatMessage.sendfile){
-         return (
-        <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
-        <View style={styles.sendermsg}>      
-        <Image key={chatMessage} source={{uri:Config.mediaurl + chatMessage.path}} style={{width:100, height:100}}/>
-        <View style={{flexDirection:'row'}}>
-        <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
-        <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
-        </View>
-        <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
-        <Icon name={"done-all"} 
-        size={18}
-        color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
-        />
-        </View>
-        </View>
-        </View>
-        <Image style={styles.img} source={{ uri: Config.mediaurl + profilepic }} />
-        </View>
-        )
+
+      if(chatMessage.sendfile.split('.')[1] == 'pdf'){
+
+        return(
+          <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
+          <TouchableOpacity style={styles.sendpdf} onPress={ () => showpdf(chatMessage.path, chatMessage.sendfile)}> 
+          <View style={{backgroundColor:'white', flexDirection:'row', padding:5}}> 
+          <Image style={{width:25,height:25}} source={require('../assets/pdfimg.png')} />
+          <Text key ={chatMessage} style={styles.pdfText}>{chatMessage.sendfile}</Text>
+          </View>
+
+
+          <View style={{flexDirection:'row'}}>
+          <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
+          <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+          </View>
+          <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
+          <Icon name={"done-all"} 
+          size={18}
+          color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
+          />
+          </View>
+          </View>
+
+          </TouchableOpacity>
+          <Image style={styles.img} source={{ uri: Config.mediaurl + profilepic }} />
+          </View>
+
+          )
       }else{
-      return (
-        <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
-        <View style={styles.sendermsg}>      
-        <Text key={chatMessage} style={{ marginRight: 50, fontSize:16 }}>{chatMessage.message}</Text>
-        <View style={{flexDirection:'row'}}>
-        <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
-        <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
-        </View>
-        <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
-        <Icon name={"done-all"} 
-        size={18}
-        color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
-        />
-        </View>
-        </View>
-        </View>
-        <Image style={styles.img} source={{ uri: Config.mediaurl + profilepic }} />
-        </View>
-        )
+
+        if(chatMessage.sendfile){
+          return (
+            <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
+            <View style={styles.sendermsg}>      
+            <Image key={chatMessage} source={{uri:Config.mediaurl + chatMessage.path}} style={{width:100, height:100}}/>
+            <View style={{flexDirection:'row'}}>
+            <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
+            <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+            </View>
+            <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
+            <Icon name={"done-all"} 
+            size={18}
+            color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
+            />
+            </View>
+            </View>
+            </View>
+            <Image style={styles.img} source={{ uri: Config.mediaurl + profilepic }} />
+            </View>
+            )
+        }else{
+          return (
+            <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
+            <View style={styles.sendermsg}>      
+            <Text key={chatMessage} style={{ marginRight: 50, fontSize:16 }}>{chatMessage.message}</Text>
+            <View style={{flexDirection:'row'}}>
+            <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
+            <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+            </View>
+            <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
+            <Icon name={"done-all"} 
+            size={18}
+            color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
+            />
+            </View>
+            </View>
+            </View>
+            <Image style={styles.img} source={{ uri: Config.mediaurl + profilepic }} />
+            </View>
+            )
+        }}
+      } else if (route.params.userclickid == chatMessage.sender && (chatMessage.sender == value || chatMessage.receiver == value)) {
+
+        if(chatMessage.sendfile.split('.')[1] == 'pdf'){
+          return(
+          <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
+          <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
+
+
+          <TouchableOpacity style={styles.receivepdf} onPress={ () => showpdf(chatMessage.path, chatMessage.sendfile)}> 
+          <View style={{backgroundColor:'white', flexDirection:'row', padding:5}}> 
+          <Image style={{width:25,height:25}} source={require('../assets/pdfimg.png')} />
+          <Text key ={chatMessage} style={styles.pdfText}>{chatMessage.sendfile}</Text>
+          </View>
+
+
+          <View style={{flexDirection:'row'}}>
+          <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
+          <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+          </View>
+          <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
+          <Icon name={"done-all"} 
+          size={18}
+          color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
+          />
+          </View>
+          </View>
+          </TouchableOpacity>
+          </View>
+          )
+        }else{
+          if(chatMessage.path){
+            return (
+              <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
+              <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
+              <View style={styles.receivermsg}>
+
+              <Image key={chatMessage} source={{uri:Config.mediaurl + chatMessage.path}} style={{width:100, height:100}}/>
+              <Text key={chatMessage}  style={styles.receivertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+              </View>
+              </View>
+              )
+          }else{
+            return (
+              <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
+              <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
+              <View style={styles.receivermsg}>
+              <Text key={chatMessage} style={{ marginRight: 50, fontSize:16 }}>{chatMessage.message}</Text>
+              <Text key={chatMessage}  style={styles.receivertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+              </View>
+              </View>
+              )
+          }
+        }
+      }}
+      );
+
+return (
+  <View style={styles.container}>
+  <Header style={{ backgroundColor: '#255E55', height: 50 ,padding:5}}>
+  <TouchableOpacity style={{ flexDirection: 'column', flex: 1 }} onPress={() => navigation.navigate('Dashboard')} >
+
+  <Icon
+  name={"keyboard-backspace"}
+  size={30}
+  color="#fff"
+  style={{ marginLeft: 8, marginTop: 6 }}
+  />
+  </TouchableOpacity>
+  <View style={{ flexDirection: 'column', flex: 2 }}>
+  <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
+  </View>
+  <View style={{ flexDirection: 'column', flex: 10 }}>
+  <Text style={styles.headertext}>{route.params.userclickname}</Text>
+
+  </View>
+  </Header>
+  <ImageBackground style={ styles.imgBackground } 
+  resizeMode='cover' 
+  source={require('../assets/bg.jpg')}>
+
+  <View style={{ flex: 6 }}>
+  <ScrollView>
+  <View>
+  {chatMessages}
+  </View>
+  </ScrollView>
+  <View style={styles.footer}>
+  <View style={styles.inputContainer}>
+  <TextInput
+  style={styles.inputs}
+  autoCorrect={false}
+  value={chatMessage}
+  multiline={true}
+  onChangeText={chatMessage => {
+    setChatMessage(chatMessage);
+  }}
+  />
+  </View>
+  <TouchableOpacity style={styles.btnSend} onPress={() => refRBSheet.current.open()} >
+
+  <Icon
+  name="attach-file"
+  size={25}
+  color="white"    
+  />
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.btnSend} onPress={() => submitChatMessage()}>
+
+  <Icon
+  name="send"
+  size={25}
+  color="white"    
+  />
+  </TouchableOpacity>
+
+  </View>
+
+  <View>
+  <RBSheet
+  ref={refRBSheet}
+  height={200}
+  duration={50}
+  closeOnDragDown={true}
+  customStyles={{
+    container: {
+      justifyContent: "center",
+      alignItems: "center",
     }
-    } else if (route.params.userclickid == chatMessage.sender && (chatMessage.sender == value || chatMessage.receiver == value)) {
-      if(chatMessage.path){
-        return (
-        <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
-        <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
-        <View style={styles.receivermsg}>
-       
-      <Image key={chatMessage} source={{uri:Config.mediaurl + chatMessage.path}} style={{width:100, height:100}}/>
-        <Text key={chatMessage}  style={styles.receivertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
-        </View>
-        </View>
-        )
-      }
-      return (
-        <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
-        <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
-        <View style={styles.receivermsg}>
-        <Text key={chatMessage} style={{ marginRight: 50, fontSize:16 }}>{chatMessage.message}</Text>
-        <Text key={chatMessage}  style={styles.receivertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
-        </View>
-        </View>
-        )
-    }
-  }
-  );
+  }}
+  >
+  <View style={{flexDirection:'row'}}>
+  <TouchableOpacity
+  style={[styles.bottomBtn, {backgroundColor:'purple'}]}
+  onPress={ () => launchImageLibrary()} >
+  <Icon
+  name="insert-photo"
+  size={45}
+  color="white"    
+  />
+  </TouchableOpacity>
+  <TouchableOpacity 
+  style={[styles.bottomBtn, {backgroundColor:'orange'}]}
+  onPress={ () => launchCamera()} >
 
-  return (
-    <View style={styles.container}>
-    <Header style={{ backgroundColor: '#255E55', height: 50 ,padding:5}}>
-    <TouchableOpacity style={{ flexDirection: 'column', flex: 1 }} onPress={() => navigation.navigate('Dashboard')} >
+  <Icon
+  name="photo-camera"
+  size={45}
+  color="white"    
+  />
+  </TouchableOpacity>
+  <TouchableOpacity 
+  style={[styles.bottomBtn, {backgroundColor:'blue'}]}
+  onPress={ () => FilePicker()}>
 
-    <Icon
-    name={"keyboard-backspace"}
-    size={30}
-    color="#fff"
-    style={{ marginLeft: 8, marginTop: 6 }}
-    />
-    </TouchableOpacity>
-    <View style={{ flexDirection: 'column', flex: 2 }}>
-    <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
-    </View>
-    <View style={{ flexDirection: 'column', flex: 10 }}>
-    <Text style={styles.headertext}>{route.params.userclickname}</Text>
+  <Icon
+  name="insert-drive-file"
+  size={45}
+  color="white"    
+  />
+  </TouchableOpacity>
+  </View>
+  </RBSheet>  
+  </View>
 
-    </View>
-    </Header>
-    <ImageBackground style={ styles.imgBackground } 
-    resizeMode='cover' 
-    source={require('../assets/bg.jpg')}>
+  </View>
+  </ImageBackground>
 
-    <View style={{ flex: 6 }}>
-    <ScrollView>
-    <View>
-    {chatMessages}
-    </View>
-    </ScrollView>
-    <View style={styles.footer}>
-    <View style={styles.inputContainer}>
-    <TextInput
-    style={styles.inputs}
-    autoCorrect={false}
-    value={chatMessage}
-    multiline={true}
-    onChangeText={chatMessage => {
-      setChatMessage(chatMessage);
-    }}
-    />
-    </View>
-    <TouchableOpacity style={styles.btnSend} onPress={() => refRBSheet.current.open()} >
-
-    <Icon
-    name="attach-file"
-    size={25}
-    color="white"    
-    />
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.btnSend} onPress={() => submitChatMessage()}>
-
-    <Icon
-    name="send"
-    size={25}
-    color="white"    
-    />
-    </TouchableOpacity>
-
-    </View>
-
-    <View>
-    <RBSheet
-    ref={refRBSheet}
-    height={200}
-    duration={50}
-    closeOnDragDown={true}
-    customStyles={{
-      container: {
-        justifyContent: "center",
-        alignItems: "center",
-      }
-    }}
-    >
-    <View style={{flexDirection:'row'}}>
-    <TouchableOpacity
-    style={[styles.bottomBtn, {backgroundColor:'purple'}]}
-    onPress={ () => launchImageLibrary()} >
-    <Icon
-    name="insert-photo"
-    size={45}
-    color="white"    
-    />
-    </TouchableOpacity>
-    <TouchableOpacity 
-    style={[styles.bottomBtn, {backgroundColor:'orange'}]}
-    onPress={ () => launchCamera()} >
-
-    <Icon
-    name="photo-camera"
-    size={45}
-    color="white"    
-    />
-    </TouchableOpacity>
-    <TouchableOpacity style={[styles.bottomBtn, {backgroundColor:'blue'}]}>
-
-    <Icon
-    name="insert-drive-file"
-    size={45}
-    color="white"    
-    />
-    </TouchableOpacity>
-    </View>
-    </RBSheet>  
-    </View>
-
-    </View>
-    </ImageBackground>
-    
-    </View>
-    )
+  </View>
+  )
 }
 export default Chat;
 const styles = StyleSheet.create({
@@ -416,6 +508,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin:5
+  },
+  sendpdf:{
+    margin: 5,
+    elevation: 5,
+    padding: 5,
+    backgroundColor: '#E0F6C7',
+    borderRadius:5,
+    flexDirection: 'column',
+    alignSelf: 'flex-end',
+    maxWidth: '75%',
+    position:'relative'
+  },
+  receivepdf:{
+    margin: 5,
+    elevation: 5,
+    padding: 5,
+    borderRadius:5,
+    backgroundColor: '#eeeeee',
+    flexDirection: 'column',
+    alignSelf: 'flex-start',
+    maxWidth: '75%',
+    position:'relative'
   },
   sendermsg: {
     margin: 5,
@@ -483,6 +597,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin:5
+  },
+  pdfText:{
+    marginRight: 50, 
+    fontSize:16 , 
+    alignItems:'center',
+    marginLeft:10,
+    fontSize:15, 
+    textAlign:'center'
   }
 
 

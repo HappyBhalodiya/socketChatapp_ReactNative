@@ -46,7 +46,7 @@ socket.on("connection", function(socket)  {
       console.log("res====>>>>", res)
       socket.to(data.id).emit('message', {msg: res.msg, id: data.id});
       socket.on("msgStatus", function(status) {
-        console.log("====status=======",res.msg,"=====", status.status, status.msgid)
+       
 
 
         if(status.status != false){
