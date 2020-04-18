@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { View, TouchableOpacity, Text, StyleSheet, ScrollView, Image, TextInput, ImageBackground } from 'react-native'
+import { View, TouchableOpacity, Text, StyleSheet, ScrollView, Modal, Image, TextInput, ImageBackground } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from '@react-native-community/async-storage';
@@ -12,6 +12,9 @@ import RNFetchBlob from 'react-native-fetch-blob';
 import FilePickerManager from 'react-native-file-picker';
 import FileViewer from 'react-native-file-viewer';
 import RNFS from 'react-native-fs';
+import Video from 'react-native-video';
+import VideoPlayer from 'react-native-video-controls';
+
 import { Container, Header, Content, Card, CardItem, Body } from 'native-base';
 let value;
 let socket;
@@ -24,8 +27,11 @@ function Chat({ route, navigation }) {
   const [chatMessage, setChatMessage] = useState('')
   const useMountEffect = (fun) => useEffect(fun, [])
   const refRBSheet = useRef();
+  const player = useRef();
   const [profilePhoto, setProfilePhoto] = useState('')
   const [profilePhotoName, setProfilePhotoName] = useState('')
+  const [visible , setVisible ] = useState(false)
+  const [selectImage, setSelectImage] =useState(undefined)
 
   //   useEffect(() => {
     //   const interval = setInterval(() => {
@@ -212,7 +218,10 @@ function Chat({ route, navigation }) {
     .catch(error => {
       console.log(error)
     });
-
+  }
+  const showImg = (filepath) =>{
+    setVisible(true)
+    setSelectImage(filepath)
   }
   const chatMessages = chats.map(chatMessage => {
     theDate = new Date(Date.parse(chatMessage.createdAt));
@@ -223,7 +232,7 @@ function Chat({ route, navigation }) {
 
         return(
           <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
-          <TouchableOpacity style={styles.sendpdf} onPress={ () => showpdf(chatMessage.path, chatMessage.sendfile)}> 
+          <TouchableOpacity style={styles.sendfile} onPress={ () => showpdf(chatMessage.path, chatMessage.sendfile)}> 
           <View style={{backgroundColor:'white', flexDirection:'row', padding:5}}> 
           <Image style={{width:25,height:25}} source={require('../assets/pdfimg.png')} />
           <Text key ={chatMessage} style={styles.pdfText}>{chatMessage.sendfile}</Text>
@@ -247,13 +256,56 @@ function Chat({ route, navigation }) {
           </View>
 
           )
-      }else{
+      }else if(chatMessage.sendfile.split('.')[1] == 'mp4'){
+        return(
+          <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
+          <TouchableOpacity style={styles.sendfile}  onLongPress={ () => showpdf(chatMessage.path, chatMessage.sendfile)}> 
+
+          <View style={{ flexDirection:'row', padding:5, height:250,width:250}}> 
+
+          <VideoPlayer
+          source={{ uri: Config.mediaurl + chatMessage.path  }}
+          disableFullscreen={true}
+          disableBack={true}
+          disableVolume={true}
+          paused={true}
+          disableSeekbar={false}
+          
+
+          />
+
+          </View>
+
+
+          <View style={{flexDirection:'row'}}>
+          <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
+          <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+          </View>
+          <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
+          <Icon name={"done-all"} 
+          size={18}
+          color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
+          />
+          </View>
+          </View>
+
+          </TouchableOpacity>
+          <Image style={styles.img} source={{ uri: Config.mediaurl + profilepic }} />
+          </View>
+
+          )
+      }
+      
+      else{
 
         if(chatMessage.sendfile){
           return (
             <View style={{flexDirection:'row',alignSelf: 'flex-end'}}>
-            <View style={styles.sendermsg}>      
-            <Image key={chatMessage} source={{uri:Config.mediaurl + chatMessage.path}} style={{width:100, height:100}}/>
+            <TouchableOpacity style={styles.sendfile} onPress={()=> showImg(chatMessage.path) }>
+            <View >  
+
+            <Image key={chatMessage} source={{uri:Config.mediaurl + chatMessage.path}} style={{width:250, height:250}}/>
+            </View>
             <View style={{flexDirection:'row'}}>
             <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
             <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
@@ -265,8 +317,29 @@ function Chat({ route, navigation }) {
             />
             </View>
             </View>
-            </View>
+            
+            </TouchableOpacity>
             <Image style={styles.img} source={{ uri: Config.mediaurl + profilepic }} />
+            <Modal
+            animationType="fade"
+            transparent={false}
+            visible={visible}
+            onRequestClose={() => {
+            }}>
+            <View >
+            <View >
+            <View style={{ flexDirection: 'row', justifyContent:'flex-end' }}>
+            <TouchableOpacity onPress={() => setVisible(false)} >
+            <Icon name="close" color="grey" size={30} />
+            </TouchableOpacity>
+            </View>
+            <View style={{elevation:5,padding:10}}>
+            <Image source={{uri: Config.mediaurl + selectImage}} style={styles.selectImage} />
+            </View>
+            </View>
+            </View>
+            </Modal>
+
             </View>
             )
         }else{
@@ -294,41 +367,102 @@ function Chat({ route, navigation }) {
 
         if(chatMessage.sendfile.split('.')[1] == 'pdf'){
           return(
-          <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
-          <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
+            <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
+            <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
 
 
-          <TouchableOpacity style={styles.receivepdf} onPress={ () => showpdf(chatMessage.path, chatMessage.sendfile)}> 
-          <View style={{backgroundColor:'white', flexDirection:'row', padding:5}}> 
-          <Image style={{width:25,height:25}} source={require('../assets/pdfimg.png')} />
-          <Text key ={chatMessage} style={styles.pdfText}>{chatMessage.sendfile}</Text>
-          </View>
+            <TouchableOpacity style={styles.receivefile} onPress={ () => showpdf(chatMessage.path, chatMessage.sendfile)}> 
+            <View style={{backgroundColor:'white', flexDirection:'row', padding:5}}> 
+            <Image style={{width:25,height:25}} source={require('../assets/pdfimg.png')} />
+            <Text key ={chatMessage} style={styles.pdfText}>{chatMessage.sendfile}</Text>
+            </View>
 
 
-          <View style={{flexDirection:'row'}}>
-          <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
-          <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
-          </View>
-          <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
-          <Icon name={"done-all"} 
-          size={18}
-          color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
-          />
-          </View>
-          </View>
-          </TouchableOpacity>
-          </View>
-          )
-        }else{
+            <View style={{flexDirection:'row'}}>
+            <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
+            <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+            </View>
+            <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
+            <Icon name={"done-all"} 
+            size={18}
+            color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
+            />
+            </View>
+            </View>
+            </TouchableOpacity>
+            </View>
+            )
+        }else if(chatMessage.sendfile.split('.')[1] == 'mp4'){
+          return(
+            <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
+            <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
+
+
+            <TouchableOpacity style={styles.receivefile} onLongPress={ () => showpdf(chatMessage.path, chatMessage.sendfile)}> 
+
+            <View style={{ flexDirection:'row', padding:5, height:250,width:250}}> 
+
+            <VideoPlayer
+            source={{ uri: Config.mediaurl + chatMessage.path  }}
+            disableFullscreen={true}
+            disableBack={true}
+            disableVolume={true}
+            paused={true}
+
+            />
+
+            </View>
+
+            <View style={{flexDirection:'row'}}>
+            <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
+            <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+            </View>
+            <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
+            <Icon name={"done-all"} 
+            size={18}
+            color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
+            />
+            </View>
+            </View>
+            </TouchableOpacity>
+            </View>
+            )
+        }
+        else{
           if(chatMessage.path){
             return (
               <View style={{flexDirection:'row',alignSelf: 'flex-start'}}>
               <Image style={styles.img} source={{ uri: route.params.userclickimg }} />
-              <View style={styles.receivermsg}>
+              <TouchableOpacity style={styles.receivefile} onPress={()=> showImg(chatMessage.path) }>
+              <View>
 
-              <Image key={chatMessage} source={{uri:Config.mediaurl + chatMessage.path}} style={{width:100, height:100}}/>
-              <Text key={chatMessage}  style={styles.receivertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+
+              <Image key={chatMessage} source={{uri:Config.mediaurl + chatMessage.path}} style={{width:250, height:250}}/>
               </View>
+              <Text key={chatMessage}  style={styles.receivertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
+
+              </TouchableOpacity>
+
+              <Modal
+              animationType="fade"
+              transparent={false}
+              visible={visible}
+              onRequestClose={() => {
+              }}>
+              <View >
+              <View >
+              <View style={{ flexDirection: 'row', justifyContent:'flex-end' }}>
+              <TouchableOpacity onPress={() => setVisible(false)} >
+              <Icon name="close" color="grey" size={30} />
+              </TouchableOpacity>
+              </View>
+              <View style={{elevation:5,padding:10}}>
+              <Image source={{uri: Config.mediaurl + selectImage}} style={styles.selectImage} />
+              </View>
+              </View>
+              </View>
+              </Modal>
+
               </View>
               )
           }else{
@@ -509,7 +643,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin:5
   },
-  sendpdf:{
+  sendfile:{
     margin: 5,
     elevation: 5,
     padding: 5,
@@ -520,7 +654,7 @@ const styles = StyleSheet.create({
     maxWidth: '75%',
     position:'relative'
   },
-  receivepdf:{
+  receivefile:{
     margin: 5,
     elevation: 5,
     padding: 5,
@@ -605,6 +739,17 @@ const styles = StyleSheet.create({
     marginLeft:10,
     fontSize:15, 
     textAlign:'center'
+  },
+  selectImage: {
+    height: 500,
+    width: "100%"
+  },
+  video: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
   }
 
 

@@ -6,7 +6,7 @@ import Register from './screen/register'
 import Dashboard from './screen/dashboard'
 import Chat from './screen/chat'
 import AsyncStorage from '@react-native-community/async-storage';
-
+import Profile from './screen/profile'
 
 const Stack = createStackNavigator();
 let userid;
@@ -30,6 +30,7 @@ function App () {
 			<Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }}/>
 			
 			<Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }}/>
+			<Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }}/>
 			</Stack.Navigator>
 			</NavigationContainer>
 			);
@@ -41,6 +42,7 @@ console.log("================else==", userid)
 			<Stack.Navigator  initialRouteName="Dashboard">
 			<Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }}/>
 			<Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }}/>
+			<Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }}/>
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Register" component={Register} />
 			
@@ -53,3 +55,6 @@ console.log("================else==", userid)
 }
 
 export default App;
+
+ 
+  

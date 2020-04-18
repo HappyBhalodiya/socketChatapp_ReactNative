@@ -57,4 +57,19 @@ controller.getUser = function (req, res) {
 	})
 }
 
+controller.getUserById = function (req, res) {
+	const userArr = [];
+	const id = req.params.id;
+	userModel.findById({_id :id}, function (err, user) {
+		console.log(err);
+		if (err)
+		return res.status(500).send();
+		if (!user)
+		return res.status(404).send();
+	userArr.push(user);
+		// console.log("get user", user);
+		res.send(userArr);
+	})
+}
+
 module.exports = controller;
