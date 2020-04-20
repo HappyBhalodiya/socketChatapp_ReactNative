@@ -36,7 +36,8 @@ const allusers = allUSer.map((res, index) => {
       <Image style={styles.img} source={{ uri: Config.mediaurl + res.path }} />
       </View>
       <View style={{ flexDirection: 'column', flex: 11 }}>
-      <Text style={styles.username}>{res.username}</Text>
+         <Text style={styles.username}>{res.username}</Text>
+            <Text style={styles.status}>{res.about}</Text>
       </View>
       </TouchableOpacity>
       )
@@ -90,4 +91,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 10
   },
+  status:{
+    color:'#6F7579',
+    fontSize:16
+  }
 })
