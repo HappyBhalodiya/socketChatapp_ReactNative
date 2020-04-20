@@ -29,6 +29,8 @@ app.post("/login",loginRoute.login)
 app.get("/getUser", loginRoute.getUser)
 app.post("/sendFile",fileUpload.upload('sendfile'),chatRouter.sendFile)
 app.get('/getUserById/:id',loginRoute.getUserById);
+app.put('/updateData/:id',fileUpload.upload('profileimage'),loginRoute.updateData);
+app.put('/updateProfile/:id',fileUpload.upload('profileimage'),loginRoute.updateProfile);
 //integrating socketio
 socket = io(http);
 

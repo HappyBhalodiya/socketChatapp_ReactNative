@@ -114,9 +114,15 @@ function Register({ navigation }) {
       return (
         <View>
           <Image style={styles.img} source={profilePhoto ? {uri :profilePhoto } : require('../assets/userpic.jpg')} />
-          <TouchableOpacity style={[styles.buttonContainer, styles.ChoosePhotoButton]} onPress={() => pickImage()}>
-            <Text style={styles.ChoosePhotoText}>Choose Photo</Text>
-          </TouchableOpacity>
+          <TouchableOpacity style={styles.choosephoto} onPress={() => pickImage()}>
+      <Icon
+      name="camera-alt"
+      size={30}
+      color="#fff"
+      style={{justifyContent:'center',textAlign:'center'}}
+      />
+
+      </TouchableOpacity>
         </View>
       )
     }
@@ -256,13 +262,9 @@ const styles = StyleSheet.create({
 
   },
   loginButton: {
-    backgroundColor: "#372e5f"
+    backgroundColor: "#38887A"
   },
-  signupButton: {
-    backgroundColor: "#372e5f",
-    marginLeft: 10
-  },
-  signUpText: {
+   signUpText: {
     color: "white"
   },
   text: {
@@ -277,19 +279,23 @@ const styles = StyleSheet.create({
 
   },
   img: {
-    height: 170,
-    width: 170,
+    height: 150,
+    width: 150,
     borderRadius: 100,
     alignItems: 'center',
     borderColor: '#e7e7e7',
-    borderBottomWidth: 5
+    borderBottomWidth: 5,
+    marginBottom:20
   },
-  ChoosePhotoText: {
-    color: 'white'
-  },
-  ChoosePhotoButton: {
-    backgroundColor: "#372e5f",
-    justifyContent: 'center',
-    alignItems: 'center'
+ 
+  choosephoto:{
+    justifyContent:'center',
+    backgroundColor:'#38887A',
+    borderRadius:50,
+    height:50,
+    width:50,
+    position: 'absolute',
+    right:15,
+    bottom:5 
   },
 });

@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
 
     },
     loginButton: {
-        backgroundColor: "#372e5f"
+        backgroundColor: "#38887A"
     },
     signupButton: {
         backgroundColor: "#372e5f",

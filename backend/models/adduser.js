@@ -6,6 +6,7 @@ let userSchema = new Schema({
 	email: String,
 	password:String,
 	username:String,
+	about:String,
 	profileimage:{ type: String, default: '' },
 	path:{type: String, default:''},
 	

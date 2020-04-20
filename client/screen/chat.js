@@ -86,6 +86,7 @@ function Chat({ route, navigation }) {
 
     value = await AsyncStorage.getItem('userid');
     profilepic = await AsyncStorage.getItem('userprofile');
+    console.log("=++++++++++++++++++++++++++++",profilepic)
     socket.emit('chat message', { msg: chatMessage, senderID: value});
     
     const chatMessages = chats.length != null ? chats.map(chatMessage => {
