@@ -383,12 +383,7 @@ function Chat({ route, navigation }) {
             <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
             <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
             </View>
-            <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
-            <Icon name={"done-all"} 
-            size={18}
-            color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
-            />
-            </View>
+          
             </View>
             </TouchableOpacity>
             </View>
@@ -418,12 +413,7 @@ function Chat({ route, navigation }) {
             <View style={{alignSelf:'flex-start', flexDirection:'column'}}> 
             <Text key={chatMessage} style={styles.sendertime}>{theDate.toLocaleTimeString().split(':')[0] + ":" + theDate.toLocaleTimeString().split(':')[1]}</Text>
             </View>
-            <View style={{alignSelf:'flex-end',flexDirection:'column',marginLeft:'auto'}}>
-            <Icon name={"done-all"} 
-            size={18}
-            color= {chatMessage.status == false ? "#95AD89" : "#46B6DB" }
-            />
-            </View>
+           
             </View>
             </TouchableOpacity>
             </View>
