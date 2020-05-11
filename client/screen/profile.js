@@ -38,6 +38,7 @@ function Profile({ navigation }) {
 		Api.getuserbyid(userid)
 		.then((res) => {
 			setUser(res)
+			setUsername(res[0].username)
 
 		})
 		.catch(err => {
@@ -267,14 +268,7 @@ function Profile({ navigation }) {
 			<View style={{ flexDirection:'column', flex:9}}>
 			<Text style={styles.text}>{user.email}</Text>
 			</View>
-			<View style={{ flexDirection:'column', flex:1}}>
-			<Icon
-			name="edit"
-			size={20}
-			color="#BCC0C3"
-			style={{ margin:5 }}
-			/>
-			</View>
+			
 			</View>
 
 			</View>
@@ -381,8 +375,8 @@ const styles = StyleSheet.create({
 		height:50,
 		width:50,
 		position: 'absolute',
-		right:15,
-		bottom:0 
+		right:10,
+		bottom:-10 
 	},
 	dialogbuttontext:{
 		color:'#38887B',

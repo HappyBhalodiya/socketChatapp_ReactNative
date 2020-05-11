@@ -18,6 +18,7 @@ const io = require("socket.io");
 
 const port = 5000;
 const Chat = require("./models/Chat");
+const User = require("./models/adduser")
 const connect = require("./dbconnect");
 //bodyparser middleware
 app.use(bodyParser.json());
@@ -35,23 +36,40 @@ app.put('/updateProfile/:id',fileUpload.upload('profileimage'),loginRoute.update
 socket = io(http);
 
 //database connection
-
+let iduser;
 
 //setup event listener
 socket.on("connection", function(socket)  { 
   const sessionID = socket.id;
   console.log("user connected");
+  socket.on('login', function (data) {
+    console.log(data)
+    iduser = data.userid;
+    console.log('a user', data.userid,"is online")
+    // socket.emit("checkConnection" , true)
+    // connect.then(db => {
+    //   User.findByIdAndUpdate({ _id: data.userid }, { $set: { checkConnection: data.checkconnection } }, { upsert: true, new: true }, function (err, user) {
+    //     console.log("update user connection", user);
+    //   })
+    // });
+
+
+  })
   socket.on('join', function (data) {    
     console.log("data>>>>>>>>>>>",data)
     socket.join(data.id);
-    socket.on("chat message", function(res) {
 
+
+    socket.on("typing", data => {
+      console.log("typing.......")    });
+    socket.on("stopTyping", () => {
+      console.log("stop typing..........")
+    });
+
+    socket.on("chat message", function(res) {
       console.log("res====>>>>", res)
       socket.to(data.id).emit('message', {msg: res.msg, id: data.id});
       socket.on("msgStatus", function(status) {
-       
-
-
         if(status.status != false){
           connect.then(db => {
             Chat.findByIdAndUpdate({ _id: status.msgid }, { $set: { status: status.status } }, { upsert: true, new: true }, function (err, user) {
@@ -72,55 +90,17 @@ socket.on("connection", function(socket)  {
 
   socket.on("disconnect", function() {
     console.log("user disconnected");
+    
+        // socket.emit("checkConnection" , true)
+
+    // connect.then(db => {
+    //   User.findByIdAndUpdate({ _id: iduser }, { $set: { checkConnection: false } }, { upsert: true, new: true }, function (err, user) {
+    //     console.log("update user connection", user);
+    //   })
+    // });
   });
 });
-
 http.listen(port, () => {
   console.log("Running on Port: " + port);
+
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // //Someone is typing
-  // socket.on("typing", data => {
-  //   socket.broadcast.emit("notifyTyping", {
-  //     user: data.user,
-  //     message: data.message
-  //   });
-  // });
-
-  // //when soemone stops typing
-  // socket.on("stopTyping", () => {
-  //   socket.broadcast.emit("notifyStopTyping");
-  // });
-

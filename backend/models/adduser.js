@@ -9,6 +9,9 @@ let userSchema = new Schema({
 	about:String,
 	profileimage:{ type: String, default: '' },
 	path:{type: String, default:''},
+	checkConnection: {
+      type: Boolean, default: false
+    },
 	
 });
 
