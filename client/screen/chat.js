@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { View, TouchableOpacity,PermissionsAndroid, Text, StyleSheet, ScrollView, Modal, Image, TextInput, ImageBackground , Alert} from 'react-native'
+import { View, TouchableOpacity, PermissionsAndroid, Text, StyleSheet, ScrollView, Modal, Image, TextInput, ImageBackground, Alert } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from '@react-native-community/async-storage';
 import Api from "../service";
 import Config from "../config";
-import RBSheet from "react-native-raw-bottom-sheet";
 import io from "socket.io-client";
 import ImagePicker from 'react-native-image-picker';
 import RNFetchBlob from 'react-native-fetch-blob';
@@ -13,8 +12,9 @@ import FilePickerManager from 'react-native-file-picker';
 import FileViewer from 'react-native-file-viewer';
 import RNFS from 'react-native-fs';
 import VideoPlayer from 'react-native-video-controls';
-import { Container, Header, Content, Card, CardItem, Body } from 'native-base';
+import { Header } from 'native-base';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import AwesomeAlert from 'react-native-awesome-alerts';
 console.disableYellowBox = true;
 let value;
 let socket;
@@ -33,24 +33,26 @@ function Chat({ route, navigation }) {
   const [showButtons, setShowButtons] = useState(false)
   const [online, setOnline] = useState(false)
   const [socketMsg, setsocketMsg] = useState('')
-  const [recordSecs , setrecordSecs] = useState('');
-  const [recordTime, setrecordTime] = useState('');
-  useEffect(() =>{
+  const [recordSecs, setrecordSecs] = useState('');
+  const [showAlert , setshowAlert] = useState(false);
+  const [ resultrecordedfile, setresultrecordedfile] = useState('');
+  
+  useEffect(() => { 
     data()
-   
+
   })
-  data = async() => {
+  data = async () => {
     value = await AsyncStorage.getItem('userid');
     profilepic = await AsyncStorage.getItem('userprofile');
     socket = io.connect("http://192.168.1.57:5000")
     socket.on('connect', function () {
       console.log("connected=========")
       socket.emit('join', { id: route.params.userclickid });
-      socket.on('message', function(data){
-        
+      socket.on('message', function (data) {
+
       })
     })
-    console.log("data=======================",socketMsg);
+    console.log("data=======================", socketMsg);
   }
   /**
      * check Message created date
@@ -147,7 +149,7 @@ function Chat({ route, navigation }) {
 
   const submitChatMessage = async () => {
     console.log("chatMessage====================", chatMessage);
-  
+
     socket.emit('chat message', { msg: chatMessage, senderID: value });
 
     const chatMessages = chats.length != null ? chats.map(chatMessage => {
@@ -165,7 +167,7 @@ function Chat({ route, navigation }) {
     datarenderfunction()
   }
   const uploadFile = async (imageName, imageuri) => {
-
+    setshowAlert(false)
     value = await AsyncStorage.getItem('userid');
     console.log("upload file hear=========", value, imageName, imageuri);
     const url = Config.baseurl + "sendFile";
@@ -572,79 +574,81 @@ function Chat({ route, navigation }) {
   }
 
   );
-const audiopermission = async() => {
-  if (Platform.OS === 'android') {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        {
-          title: 'Permissions for write access',
-          message: 'Give permission to your storage to write a file',
-          buttonPositive: 'ok',
-        },
+  const audiopermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Permissions for write access',
+            message: 'Give permission to your storage to write a file',
+            buttonPositive: 'ok',
+          },
         );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use the storage');
-      } else {
-        console.log('permission denied');
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('You can use the storage');
+        } else {
+          console.log('permission denied');
+          return;
+        }
+      } catch (err) {
+        console.warn(err);
         return;
       }
-    } catch (err) {
-      console.warn(err);
-      return;
     }
-  }
-  if (Platform.OS === 'android') {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-        {
-          title: 'Permissions for write access',
-          message: 'Give permission to your storage to write a file',
-          buttonPositive: 'ok',
-        },
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          {
+            title: 'Permissions for write access',
+            message: 'Give permission to your storage to write a file',
+            buttonPositive: 'ok',
+          },
         );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use the camera');
-        onStartRecord();
-      } else {
-        console.log('permission denied');
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('You can use the camera');
+          onStartRecord();
+        } else {
+          console.log('permission denied');
+          return;
+        }
+      } catch (err) {
+        console.warn(err);
         return;
       }
-    } catch (err) {
-      console.warn(err);
-      return;
     }
   }
-}
 
-const onStartRecord = async() => {
-							
+  const onStartRecord = async () => {
 
-  const path = Platform.select({
-    android: 'sdcard/Record'+Math.floor(Math.random() * 10000000000) + '.mp3',
-  });
-  console.log(path)
-  const result = await audioRecorderPlayer.startRecorder(path);
-  audioRecorderPlayer.addRecordBackListener((e) => {
-    // setrecordSecs(e.current_position)
-    // setrecordTime(audioRecorderPlayer.mmssss(
-    //   Math.floor(e.current_position),
-    //   ),)
 
-    return;
-  });
-  console.log(result);
-};
+    const path = Platform.select({
+      android: 'sdcard/Record' + Math.floor(Math.random() * 10000000000) + '.mp3',
+    });
+    console.log(path)
+    const result = await audioRecorderPlayer.startRecorder(path);
+    audioRecorderPlayer.addRecordBackListener((e) => {
+      // setrecordSecs(e.current_position)
+      // setrecordTime(audioRecorderPlayer.mmssss(
+      //   Math.floor(e.current_position),
+      //   ),)
 
-const onStopRecord = async () => {
-  const result = await audioRecorderPlayer.stopRecorder();
-  audioRecorderPlayer.removeRecordBackListener();
-  setrecordSecs(0)
-Alert.alert("stop")
-  console.log("result om  stop",result, result.split('/')[4]);
-  uploadFile(result.split('/')[4],result)
-};
+      return;
+    });
+    console.log(result);
+  };
+
+  const onStopRecord = async () => {
+    const result = await audioRecorderPlayer.stopRecorder();
+    audioRecorderPlayer.removeRecordBackListener();
+    setrecordSecs(0)
+    setshowAlert(true)
+    console.log("result om  stop", result, result.split('/')[4]);
+    setresultrecordedfile(result)
+    
+    
+  };
   const startTyping = () => {
     // console.log("typing/......")
     socket.emit('typing', setTyping(true))
@@ -726,6 +730,7 @@ Alert.alert("stop")
 
             }
             <TouchableOpacity style={styles.inputContainer}>
+
               <TextInput
                 style={styles.inputs}
                 autoCorrect={false}
@@ -743,35 +748,58 @@ Alert.alert("stop")
             </TouchableOpacity>
             {
               !showButtons ?
-              <>
-              {
-                chatMessage == '' ?
-                <TouchableOpacity style={styles.btnSend} onPressIn= { () => audiopermission()} onPressOut={() => onStopRecord()}>
+                <>
+                  {
+                    chatMessage == '' ?
+                      <TouchableOpacity style={styles.btnSend} onPressIn={() => audiopermission()} onPressOut={() => onStopRecord()}>
 
-                  <Icon
-                    name="mic"
-                    size={25}
-                    color="white"
-                  />
-                </TouchableOpacity> : 
-                 <TouchableOpacity style={styles.btnSend} onPress={() => submitChatMessage()}>
+                        <Icon
+                          name="mic"
+                          size={25}
+                          color="white"
+                        />
+                      </TouchableOpacity> :
+                      <TouchableOpacity style={styles.btnSend} onPress={() => submitChatMessage()}>
 
-                 <Icon
-                   name="send"
-                   size={25}
-                   color="white"
-                 />
-               </TouchableOpacity>
-              }
-               </>
+                        <Icon
+                          name="send"
+                          size={25}
+                          color="white"
+                        />
+                      </TouchableOpacity>
+                  }
+                </>
                 : null
             }
+           
 
           </View>
 
           <View>
           </View>
-
+         
+   
+      <AwesomeAlert
+      show={showAlert}
+      showProgress={false}
+      title="Send Audio Sms"
+      message="I have a message for you!"
+      closeOnTouchOutside={true}
+      closeOnHardwareBackPress={false}
+      showCancelButton={true}
+      showConfirmButton={true}
+      cancelText="No, delete it "
+      confirmText="Yes, send it"
+      confirmButtonColor="#DD6B55"
+      onCancelPressed={() => {
+       
+        setshowAlert(false)
+      }}
+      onConfirmPressed={() => {
+        uploadFile(resultrecordedfile.split('/')[4], resultrecordedfile)
+       
+      }}
+    />
         </View>
       </ImageBackground>
 
