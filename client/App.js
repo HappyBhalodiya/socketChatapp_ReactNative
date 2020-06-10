@@ -7,7 +7,7 @@ import Dashboard from './screen/dashboard'
 import Chat from './screen/chat'
 import AsyncStorage from '@react-native-community/async-storage';
 import Profile from './screen/profile'
-
+console.disableYellowBox = true;
 const Stack = createStackNavigator();
 let userid;
 function App() {
@@ -16,7 +16,7 @@ function App() {
 		datarenderfunction()
 	})
 	datarenderfunction = async () => {
-
+		
 		userid = await AsyncStorage.getItem('userid');
 		console.log("==================", userid)
 	}
@@ -28,7 +28,6 @@ function App() {
 					<Stack.Screen name="Login" component={Login} />
 					<Stack.Screen name="Register" component={Register} />
 					<Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }} />
-
 					<Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }} />
 					<Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
 				</Stack.Navigator>
@@ -37,7 +36,7 @@ function App() {
 	} else {
 		console.log("call else")
 		console.log("================else==", userid)
-		return (
+	return (
 			<NavigationContainer>
 				<Stack.Navigator initialRouteName="Dashboard">
 					<Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }} />
@@ -48,7 +47,7 @@ function App() {
 
 
 				</Stack.Navigator>
-			</NavigationContainer>
+			</NavigationContainer>	
 		);
 	}
 
@@ -119,16 +118,15 @@ export default App;
 					// 	}
 
 
-					// 	console.log(Math.floor(Math.random() * 10000000))
+					
 
 					// 	const onStartRecord = async() => {
-					// 		var value = Math.floor(Math.random() * Math.floor(max));
-					// 		console.log('Record'+Math.floor(Math.random() * Math.floor(max)) + 'mp3');
+							
 
 					// 		const path = Platform.select({
-					// 			android: 'sdcard/Record'+Math.floor(Math.random() * Math.floor(max)) + 'mp3',
+					// 			android: 'sdcard/Record'+Math.floor(Math.random() * 10000000000) + '.mp3',
 					// 		});
-
+					// 		console.log(path)
 					// 		const result = await audioRecorderPlayer.startRecorder(path);
 					// 		audioRecorderPlayer.addRecordBackListener((e) => {
 					// 			setrecordSecs(e.current_position)
@@ -156,8 +154,8 @@ export default App;
 					// 	return(
 					// 		<View>
 
-					// 		<TouchableOpacity style={{justifyContent:'center',alignItems: "center"}} onPress= { () => startaudio()}><Text style={{fontSize:20}}>hiii</Text></TouchableOpacity>
-					// 		<TouchableOpacity  style={{justifyContent:'center',alignItems: "center"}} onPress= { () => onStopRecord()}><Text style={{fontSize:20}}>stop</Text></TouchableOpacity>
+					// 		<TouchableOpacity style={{justifyContent:'center',alignItems: "center"}} onPressIn= { () => startaudio()} onPressOut={() => onStopRecord()}><Text style={{fontSize:20}}>hiii</Text></TouchableOpacity>
+
 
 
 

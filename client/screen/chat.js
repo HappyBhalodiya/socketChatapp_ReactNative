@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { View, TouchableOpacity, Text, StyleSheet, ScrollView, Modal, Image, TextInput, ImageBackground } from 'react-native'
+import { View, TouchableOpacity,PermissionsAndroid, Text, StyleSheet, ScrollView, Modal, Image, TextInput, ImageBackground , Alert} from 'react-native'
 import { useFocusEffect } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from '@react-native-community/async-storage';
@@ -14,17 +14,16 @@ import FileViewer from 'react-native-file-viewer';
 import RNFS from 'react-native-fs';
 import VideoPlayer from 'react-native-video-controls';
 import { Container, Header, Content, Card, CardItem, Body } from 'native-base';
-
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+console.disableYellowBox = true;
 let value;
 let socket;
 let theDate;
 let profilepic;
 let messageDateString;
 function Chat({ route, navigation }) {
-
+  const audioRecorderPlayer = new AudioRecorderPlayer();
   const useMountEffect = (fun) => useEffect(fun, [])
-  const player = useRef();
-  const refRBSheet = useRef();
   const [chats, setChats] = useState([])
   const [chatMessage, setChatMessage] = useState('')
   const [selectImage, setSelectImage] = useState(undefined)
@@ -33,23 +32,25 @@ function Chat({ route, navigation }) {
   const [connected, setConnected] = useState(false)
   const [showButtons, setShowButtons] = useState(false)
   const [online, setOnline] = useState(false)
-  const [msg, setmsg] = useState('')
+  const [socketMsg, setsocketMsg] = useState('')
+  const [recordSecs , setrecordSecs] = useState('');
+  const [recordTime, setrecordTime] = useState('');
   useEffect(() =>{
     data()
-    
+   
   })
   data = async() => {
     value = await AsyncStorage.getItem('userid');
+    profilepic = await AsyncStorage.getItem('userprofile');
     socket = io.connect("http://192.168.1.57:5000")
     socket.on('connect', function () {
       console.log("connected=========")
       socket.emit('join', { id: route.params.userclickid });
       socket.on('message', function(data){
-        // setmsg(data)
-        console.log("data=======================",data);
-
+        
       })
     })
+    console.log("data=======================",socketMsg);
   }
   /**
      * check Message created date
@@ -146,7 +147,7 @@ function Chat({ route, navigation }) {
 
   const submitChatMessage = async () => {
     console.log("chatMessage====================", chatMessage);
-    profilepic = await AsyncStorage.getItem('userprofile');
+  
     socket.emit('chat message', { msg: chatMessage, senderID: value });
 
     const chatMessages = chats.length != null ? chats.map(chatMessage => {
@@ -571,7 +572,79 @@ function Chat({ route, navigation }) {
   }
 
   );
+const audiopermission = async() => {
+  if (Platform.OS === 'android') {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Permissions for write access',
+          message: 'Give permission to your storage to write a file',
+          buttonPositive: 'ok',
+        },
+        );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the storage');
+      } else {
+        console.log('permission denied');
+        return;
+      }
+    } catch (err) {
+      console.warn(err);
+      return;
+    }
+  }
+  if (Platform.OS === 'android') {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        {
+          title: 'Permissions for write access',
+          message: 'Give permission to your storage to write a file',
+          buttonPositive: 'ok',
+        },
+        );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the camera');
+        onStartRecord();
+      } else {
+        console.log('permission denied');
+        return;
+      }
+    } catch (err) {
+      console.warn(err);
+      return;
+    }
+  }
+}
 
+const onStartRecord = async() => {
+							
+
+  const path = Platform.select({
+    android: 'sdcard/Record'+Math.floor(Math.random() * 10000000000) + '.mp3',
+  });
+  console.log(path)
+  const result = await audioRecorderPlayer.startRecorder(path);
+  audioRecorderPlayer.addRecordBackListener((e) => {
+    // setrecordSecs(e.current_position)
+    // setrecordTime(audioRecorderPlayer.mmssss(
+    //   Math.floor(e.current_position),
+    //   ),)
+
+    return;
+  });
+  console.log(result);
+};
+
+const onStopRecord = async () => {
+  const result = await audioRecorderPlayer.stopRecorder();
+  audioRecorderPlayer.removeRecordBackListener();
+  setrecordSecs(0)
+Alert.alert("stop")
+  console.log("result om  stop",result, result.split('/')[4]);
+  uploadFile(result.split('/')[4],result);
+};
   const startTyping = () => {
     // console.log("typing/......")
     socket.emit('typing', setTyping(true))
@@ -670,14 +743,24 @@ function Chat({ route, navigation }) {
             </TouchableOpacity>
             {
               !showButtons ?
-                <TouchableOpacity style={styles.btnSend} onPress={() => submitChatMessage()}>
+              <>
+                <TouchableOpacity style={styles.btnSend} onPressIn= { () => audiopermission()} onPressOut={() => onStopRecord()}>
 
                   <Icon
-                    name="send"
+                    name="mic"
                     size={25}
                     color="white"
                   />
                 </TouchableOpacity>
+                 <TouchableOpacity style={styles.btnSend} onPress={() => submitChatMessage()}>
+
+                 <Icon
+                   name="send"
+                   size={25}
+                   color="white"
+                 />
+               </TouchableOpacity>
+               </>
                 : null
             }
 
