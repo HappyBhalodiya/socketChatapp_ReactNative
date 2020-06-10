@@ -643,7 +643,7 @@ const onStopRecord = async () => {
   setrecordSecs(0)
 Alert.alert("stop")
   console.log("result om  stop",result, result.split('/')[4]);
-  uploadFile(result.split('/')[4],result);
+  uploadFile(result.split('/')[4],result)
 };
   const startTyping = () => {
     // console.log("typing/......")
@@ -744,6 +744,8 @@ Alert.alert("stop")
             {
               !showButtons ?
               <>
+              {
+                chatMessage == '' ?
                 <TouchableOpacity style={styles.btnSend} onPressIn= { () => audiopermission()} onPressOut={() => onStopRecord()}>
 
                   <Icon
@@ -751,7 +753,7 @@ Alert.alert("stop")
                     size={25}
                     color="white"
                   />
-                </TouchableOpacity>
+                </TouchableOpacity> : 
                  <TouchableOpacity style={styles.btnSend} onPress={() => submitChatMessage()}>
 
                  <Icon
@@ -760,6 +762,7 @@ Alert.alert("stop")
                    color="white"
                  />
                </TouchableOpacity>
+              }
                </>
                 : null
             }
