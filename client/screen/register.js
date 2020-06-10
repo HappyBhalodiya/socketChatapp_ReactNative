@@ -48,6 +48,7 @@ function Register({ navigation }) {
           console.log("errr=====", err)
         });
     } else {
+      console.log("in else")
       const url = Config.baseurl + "add";
 
       console.log("call else", url)
@@ -74,7 +75,7 @@ function Register({ navigation }) {
           },
 
         ]).then((res) => {
-
+          console.log("resp=============",resp);
           var resp = JSON.parse(res.data);
           console.log("yessss   uploaded", resp);
           Toast.show("successfully Data added.");

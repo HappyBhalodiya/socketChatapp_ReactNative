@@ -6,12 +6,13 @@ const multer = require('multer');
 */
 const upload = (file, next) => {
     if (file) {
+
         const storage = multer.diskStorage({
             destination: function (req, file, cb) {
                 cb(null, './uploads/')
             },
             filename: function (req, file, cb) {
-                console.log("middelware file:", file)
+                console.log("middelware file:================",req, file)
                 cb(null, Date.now() + '_' + file.originalname)
             }
         })

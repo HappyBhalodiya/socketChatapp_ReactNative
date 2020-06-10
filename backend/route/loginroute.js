@@ -1,6 +1,7 @@
 var userModel = require('../models/adduser');
 let controller = {};
 const connectdb = require("./../dbconnect");
+
 controller.add = function (req, res) {
 	console.log("=========data>>>>>>>>>>>>>>",req.body, req.file);
 	const userData = req.file == undefined ?{
@@ -38,7 +39,7 @@ controller.login = function (req, res) {
 			return res.status(200).json({ message : "Login successfully" , result :{user} } )
 
 		}
-		// console.log("login", user);
+		console.log("login", user);
 		res.send(user);
 	})
 }
@@ -88,6 +89,7 @@ controller.updateData = function (req, res) {
 }
 
 
+
 controller.updateProfile = function (req, res) {
 	const id = req.params.id;
 	console.log("idd-----------", id, req.body)
@@ -105,6 +107,7 @@ controller.updateProfile = function (req, res) {
 		res.send(user);
 
 	})
+
 }
 
 module.exports = controller;
