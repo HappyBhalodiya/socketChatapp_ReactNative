@@ -38,6 +38,22 @@ router.sendFile = function (req, res) {
   })
 
 }
+router.deleteMsg =  function (req, res) {
+  console.log("req.body===========",req.body)
 
+  connectdb.then(db => {
+    Chats.deleteMany( {_id: { $in: req.body}}, function (err, msg) {
+      console.log(err);
+      if (err)
+        return res.status(500).json({message : err});
+      if (!msg)
+        return res.status(404).send();
+      console.log("delete msg", msg);
+      return res.status(200).json({ message : msg.deletedCount + " Massage Deleted" } )
+  
+    })
+
+  })
+}
 
 module.exports = router;

@@ -67,6 +67,17 @@ export default {
     })
     .catch({ status: 500, message: "Internal Serevr Error" });
 
+  },
+  deleteSelectedMassage : async(body) => {
+    const url = Config.baseurl + "deleteMsg";
+    console.log("body===", body, url)
+    return axios
+    .post(url,body)
+    .then(response => {
+      console.log("+++++++++++++++++++",response.data)
+      return JSON.stringify(response.data);
+    })
+     .catch({ status: 500, message: "Internal Serevr Error" });
   }
   
 };

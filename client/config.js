@@ -1,6 +1,6 @@
 module.exports = {
-	baseurl: "http://192.168.1.57:5000/",
-	mediaurl : "http://192.168.1.57/Happy/React_Native/chatapp_react/chatapp/backend/"	
+	baseurl: "http://192.168.43.179:5000/",
+	mediaurl : "http://192.168.43.179/React-Native/chatapp_new_12_june/chatapp/backend/"	
 }													
 
 

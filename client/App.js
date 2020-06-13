@@ -55,8 +55,7 @@ function App() {
 
 export default App;
 
-
-					// import React, { useState, useEffect } from 'react'
+// 					// import React, { useState, useEffect } from 'react'
 					// import { View, Text, TouchableOpacity,PermissionsAndroid, StyleSheet, ScrollView, Image, TextInput } from 'react-native'
 					// import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 					// import { Slider } from 'react-native-elements';
@@ -157,7 +156,7 @@ export default App;
 					// 		<TouchableOpacity style={{justifyContent:'center',alignItems: "center"}} onPressIn= { () => startaudio()} onPressOut={() => onStopRecord()}><Text style={{fontSize:20}}>hiii</Text></TouchableOpacity>
 
 
-
+					// 		<Text>{recordTime}</Text>
 
 
 					// 		</View>
@@ -168,3 +167,5 @@ export default App;
 
 					// export default App;
 
+
+// 					import React, {useState, useEffect} from 'react';

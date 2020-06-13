@@ -48,7 +48,7 @@ function Dashboard({ navigation }) {
   }
   const allusers = allUSer.map((res, index) => {
 
-    console.log(res.username, "on off ============", res.checkConnection)
+    
     if (res._id != userid) {
       return (
 

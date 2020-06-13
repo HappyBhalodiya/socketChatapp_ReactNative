@@ -32,12 +32,12 @@ app.post("/sendFile",fileUpload.upload('sendfile'),chatRouter.sendFile)
 app.get('/getUserById/:id',loginRoute.getUserById);
 app.put('/updateData/:id',fileUpload.upload('profileimage'),loginRoute.updateData);
 app.put('/updateProfile/:id',fileUpload.upload('profileimage'),loginRoute.updateProfile);
+app.post('/deleteMsg',chatRouter.deleteMsg);
 //integrating socketio
 socket = io(http);
-
+var temp_datetime_obj = new Date();
 //setup event listener
 socket.on("connection", function(socket)  { 
-  const sessionID = socket.id;
   console.log("user connected");
 
   socket.on('join', function (data) {    
@@ -49,8 +49,8 @@ socket.on("connection", function(socket)  {
     })
 
     socket.on("chat message", function(res) {
-      console.log("res====>>>>", res)
-      socket.to(data.id).emit('message', {msg: res.msg, receiverid: data.id, senderid: res.senderID });
+      console.log("chat message====>>>>", res)
+      socket.emit('message', {message: res.msg, receiver: data.id, sender: res.senderID ,createdAt:new Date(temp_datetime_obj.toISOString())});
       socket.on("msgStatus", function(status) {
         if(status.status != false){
           connect.then(db => {
